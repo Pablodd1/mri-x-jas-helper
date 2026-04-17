@@ -28,25 +28,23 @@ def encode_image_to_base64(image_bytes: bytes) -> str:
 async def analyze_with_ollama(
     image_bytes: bytes,
     prompt: str,
-    model: Optional[str] = None,
 ) -> dict:
     """
     Local inference via Ollama HTTP API.
     No API key needed, runs entirely on local GPU/CPU.
     """
-    model = model or settings.ollama_model
     base_url = settings.ollama_base_url.rstrip("/")
     url = f"{base_url}/api/generate"
 
     image_b64 = encode_image_to_base64(image_bytes)
 
     payload = {
-        "model": model,
+        "model": settings.ollama_model,
         "prompt": prompt,
         "images": [image_b64],
         "stream": False,
         "options": {
-            "temperature": 0.3,  # Lower temp for medical accuracy
+            "temperature": 0.3,
             "top_p": 0.9,
         },
     }
@@ -58,7 +56,7 @@ async def analyze_with_ollama(
             data = response.json()
             return {
                 "provider": "ollama",
-                "model": model,
+                "model": settings.ollama_model,
                 "text": data.get("response", ""),
                 "success": True,
             }
@@ -68,6 +66,55 @@ async def analyze_with_ollama(
             return {"provider": "ollama", "success": False, "error": f"HTTP {e.response.status_code}: {e.response.text[:200]}"}
         except Exception as e:
             return {"provider": "ollama", "success": False, "error": str(e)}
+
+
+# ─── Ollama (Modal cloud GPU — no local machine needed) ─────────────────────
+
+async def analyze_with_modal_ollama(
+    image_bytes: bytes,
+    prompt: str,
+) -> dict:
+    """
+    Ollama running on Modal's cloud GPU infrastructure.
+    No local machine needed — fully cloud-hosted inference.
+    Set MODAL_OLLAMA_URL to your Modal deployed endpoint.
+    """
+    if not settings.modal_ollama_url:
+        return {"provider": "modal", "success": False, "error": "MODAL_OLLAMA_URL not configured"}
+
+    base_url = settings.modal_ollama_url.rstrip("/")
+    url = f"{base_url}/api/generate"
+
+    image_b64 = encode_image_to_base64(image_bytes)
+
+    payload = {
+        "model": settings.modal_ollama_model,
+        "prompt": prompt,
+        "images": [image_b64],
+        "stream": False,
+        "options": {
+            "temperature": 0.3,
+            "top_p": 0.9,
+        },
+    }
+
+    async with httpx.AsyncClient(timeout=120.0) as client:
+        try:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            return {
+                "provider": "modal",
+                "model": settings.modal_ollama_model,
+                "text": data.get("response", ""),
+                "success": True,
+            }
+        except httpx.ConnectError:
+            return {"provider": "modal", "success": False, "error": "Modal Ollama endpoint not reachable. Check MODAL_OLLAMA_URL"}
+        except httpx.HTTPStatusError as e:
+            return {"provider": "modal", "success": False, "error": f"HTTP {e.response.status_code}: {e.response.text[:200]}"}
+        except Exception as e:
+            return {"provider": "modal", "success": False, "error": str(e)}
 
 
 # ─── Kimi (Moonshot) ─────────────────────────────────────────────────────────
@@ -183,11 +230,17 @@ async def analyze_with_minimax(
 async def analyze_image(
     image_bytes: bytes,
     prompt: str,
-    preferred_provider: Literal["ollama", "kimi", "minimax"] = "ollama",
-    require_provider: Optional[Literal["ollama", "kimi", "minimax"]] = None,
+    preferred_provider: Literal["modal", "ollama", "kimi", "minimax"] = "modal",
+    require_provider: Optional[Literal["modal", "ollama", "kimi", "minimax"]] = None,
 ) -> dict:
     """
     Main entry point. Tries providers in order with automatic fallback.
+
+    Priority order for sellable product:
+      1. Modal Ollama (cloud GPU, no local machine needed) — DEFAULT
+      2. Local Ollama (user's own GPU, free)
+      3. Kimi (Moonshot API, affordable)
+      4. MiniMax (fallback)
 
     Args:
         image_bytes: Raw image data
@@ -200,7 +253,9 @@ async def analyze_image(
     """
     if require_provider:
         # Single provider mode
-        if require_provider == "ollama":
+        if require_provider == "modal":
+            return await analyze_with_modal_ollama(image_bytes, prompt)
+        elif require_provider == "ollama":
             return await analyze_with_ollama(image_bytes, prompt)
         elif require_provider == "kimi":
             return await analyze_with_kimi(image_bytes, prompt)
@@ -208,14 +263,17 @@ async def analyze_image(
             return await analyze_with_minimax(image_bytes, prompt)
 
     # Multi-provider with fallback
+    # Priority: Modal (cloud GPU) → local Ollama → Kimi → MiniMax
     order = [preferred_provider]
-    others = ["ollama", "kimi", "minimax"]
+    others = ["modal", "ollama", "kimi", "minimax"]
     others.remove(preferred_provider)
     order.extend(others)
 
     last_error = None
     for provider in order:
-        if provider == "ollama":
+        if provider == "modal":
+            result = await analyze_with_modal_ollama(image_bytes, prompt)
+        elif provider == "ollama":
             result = await analyze_with_ollama(image_bytes, prompt)
         elif provider == "kimi":
             result = await analyze_with_kimi(image_bytes, prompt)

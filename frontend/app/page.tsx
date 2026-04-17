@@ -76,7 +76,8 @@ const MODES = [
 ];
 
 const PROVIDERS = [
-  { id: "ollama", label: "Ollama (Local)", desc: "Free, runs on your machine", requiresKey: false },
+  { id: "modal", label: "Modal (Cloud GPU)", desc: "No local machine needed", requiresKey: false },
+  { id: "ollama", label: "Ollama (Local)", desc: "Free, uses your GPU", requiresKey: false },
   { id: "kimi", label: "Kimi (Moonshot)", desc: "Affordable cloud AI", requiresKey: true },
   { id: "minimax", label: "MiniMax", desc: "Cost-effective fallback", requiresKey: true },
 ];
@@ -472,6 +473,7 @@ export default function HomePage() {
         <div className="flex flex-wrap items-center gap-3 mb-6 text-xs">
           <span className="text-slate-500 font-medium">AI Providers:</span>
           {[
+            { key: "modal", label: "Modal GPU" },
             { key: "ollama", label: "Ollama" },
             { key: "kimi", label: "Kimi" },
             { key: "minimax", label: "MiniMax" },

@@ -71,6 +71,7 @@ class HealthResponse(BaseModel):
     status: str
     providers: dict
     version: str
+    modal: dict = {}
 
 
 # ─── Health Check ────────────────────────────────────────────────────────────
@@ -87,6 +88,11 @@ async def health_check():
             "deepgram": bool(settings.deepgram_api_key),
         },
         version="1.0.0",
+        modal={
+            "configured": bool(settings.modal_ollama_url),
+            "url": settings.modal_ollama_url[:50] + "..." if settings.modal_ollama_url else "",
+            "model": settings.modal_ollama_model,
+        },
     )
 
 

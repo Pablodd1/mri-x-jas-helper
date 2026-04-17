@@ -1,0 +1,54 @@
+version: "3.8"
+
+services:
+  # Backend: FastAPI + Ollama
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - KIMI_API_KEY=${KIMI_API_KEY:-}
+      - MINIMAX_API_KEY=${MINIMAX_API_KEY:-}
+      - DEEPGRAM_API_KEY=${DEEPGRAM_API_KEY:-}
+      - PORT=8080
+      - CORS_ORIGIN=http://localhost:3000
+    depends_on:
+      - ollama
+    restart: unless-stopped
+
+  # Ollama: Local AI inference (GPU-enabled if available)
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+    # Uncomment for CPU-only:
+    # profiles: [cpu]
+
+  # Frontend: Next.js
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  ollama-data:

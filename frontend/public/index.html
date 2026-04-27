@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedView Pro - MRI & X-Ray Viewer</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        header {
+            background: #1e293b;
+            padding: 1rem 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .logo h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+        }
+        .logo p {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+        
+        /* Main Layout */
+        .main {
+            display: flex;
+            margin-top: 70px;
+            height: calc(100vh - 70px);
+        }
+        
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .sidebar-section {
+            padding: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+        .sidebar-section h3 {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+        
+        /* Upload Area */
+        .upload-area {
+            border: 2px dashed #475569;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.1);
+        }
+        .upload-area input {
+            display: none;
+        }
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .upload-area p {
+            font-size: 0.85rem;
+            color: #94a3b8;
+        }
+        
+        /* Studies List */
+        .studies-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0.5rem;
+        }
+        .study-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .study-item:hover {
+            background: #1e293b;
+        }
+        .study-item.active {
+            border-color: #3b82f6;
+            background: rgba(59, 130, 246, 0.15);
+        }
+        .study-item .date {
+            font-size: 0.7rem;
+            color: #64748b;
+        }
+        .study-item .name {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #e2e8f0;
+            margin: 0.25rem 0;
+        }
+        .study-item .modality {
+            display: inline-block;
+            padding: 0.15rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            background: #334155;
+            color: #94a3b8;
+        }
+        .study-item .modality.mri { background: #7c3aed; color: white; }
+        .study-item .modality.xray { background: #059669; color: white; }
+        .study-item .modality.ct { background: #dc2626; color: white; }
+        
+        /* Viewer Area */
+        .viewer {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: #0f172a;
+            position: relative;
+        }
+        
+        /* Toolbar */
+        .toolbar {
+            background: #1e293b;
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            border-bottom: 1px solid #334155;
+            flex-wrap: wrap;
+        }
+        .toolbar-group {
+            display: flex;
+            gap: 0.25rem;
+            padding-right: 0.75rem;
+            border-right: 1px solid #334155;
+            margin-right: 0.5rem;
+        }
+        .toolbar-group:last-child {
+            border-right: none;
+        }
+        .tool-btn {
+            background: #334155;
+            border: none;
+            color: #e2e8f0;
+            padding: 0.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .tool-btn:hover {
+            background: #475569;
+        }
+        .tool-btn.active {
+            background: #3b82f6;
+        }
+        .zoom-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .zoom-controls span {
+            min-width: 50px;
+            text-align: center;
+            font-size: 0.85rem;
+        }
+        
+        /* Image Container */
+        .image-container {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            background: #000;
+        }
+        .image-container canvas {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+        .image-placeholder {
+            text-align: center;
+            color: #64748b;
+        }
+        .image-placeholder-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Annotations Panel */
+        .annotations-panel {
+            width: 320px;
+            background: #1e293b;
+            border-left: 1px solid #334155;
+            display: flex;
+            flex-direction: column;
+        }
+        .annotation-tabs {
+            display: flex;
+            border-bottom: 1px solid #334155;
+        }
+        .annotation-tab {
+            flex: 1;
+            padding: 0.75rem;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        .annotation-tab.active {
+            color: #3b82f6;
+            border-bottom: 2px solid #3b82f6;
+        }
+        .annotation-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+        
+        /* Notes Section */
+        .notes-section {
+            padding: 1rem;
+            border-bottom: 1px solid #334155;
+        }
+        .notes-section h3 {
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+        .notes-textarea {
+            width: 100%;
+            min-height: 100px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            padding: 0.75rem;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .notes-textarea:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+        
+        /* Findings Section */
+        .findings-list {
+            padding: 0.5rem;
+        }
+        .finding-item {
+            background: #0f172a;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        .finding-item .label {
+            font-size: 0.7rem;
+            color: #64748b;
+            text-transform: uppercase;
+        }
+        .finding-item .text {
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+        .confidence-bar {
+            height: 4px;
+            background: #334155;
+            border-radius: 2px;
+            margin-top: 0.5rem;
+            overflow: hidden;
+        }
+        .confidence-bar .fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width 0.3s;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        
+        /* Status Bar */
+        .status-bar {
+            background: #1e293b;
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-top: 1px solid #334155;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show {
+            display: flex;
+        }
+        .modal-content {
+            background: #1e293b;
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal h2 {
+            margin-bottom: 1rem;
+            color: white;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #3b82f6;
+            color: white;
+        }
+        .btn-secondary {
+            background: #334155;
+            color: #e2e8f0;
+        }
+        
+        /* Form */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
+            color: #94a3b8;
+        }
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 6px;
+            color: #e2e8f0;
+            font-size: 0.85rem;
+        }
+        
+        /* Drawing Canvas Overlay */
+        .draw-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            cursor: crosshair;
+        }
+        
+        /* Measurements */
+        .measurements {
+            padding: 0.5rem;
+        }
+        .measurement-item {
+            background: #0f172a;
+            border-radius: 6px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+        }
+        .measurement-item .value {
+            font-weight: 600;
+            color: #3b82f6;
+        }
+        
+        @media (max-width: 1024px) {
+            .annotations-panel {
+                display: none;
+            }
+        }
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <div class="logo-icon">🏥</div>
+            <div>
+                <h1>MedView Pro</h1>
+                <p>MRI & X-Ray Viewer</p>
+            </div>
+        </div>
+        <button class="btn btn-secondary" onclick="showNewStudyModal()">+ New Study</button>
+    </header>
+
+    <div class="main">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <h3>Upload Image</h3>
+                <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*,.dcm" onchange="handleFileSelect(event)">
+                    <div class="upload-icon">📤</div>
+                    <p>Drop X-ray or MRI here<br>or click to browse</p>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <h3>Quick Filters</h3>
+                <select id="filterModality" onchange="filterStudies()" style="width:100%; padding:0.5rem; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0;">
+                    <option value="">All Modalities</option>
+                    <option value="MRI">MRI</option>
+                    <option value="X-Ray">X-Ray</option>
+                    <option value="CT">CT Scan</option>
+                </select>
+            </div>
+            
+            <div class="studies-list" id="studiesList">
+                <!-- Studies will be populated here -->
+            </div>
+        </div>
+
+        <!-- Viewer -->
+        <div class="viewer">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button class="tool-btn" onclick="setTool('pan')" id="toolPan" title="Pan"><span>✋</span></button>
+                    <button class="tool-btn" onclick="setTool('zoom')" id="toolZoom" title="Zoom"><span>🔍</span></button>
+                    <button class="tool-btn" onclick="setTool('draw')" id="toolDraw" title="Draw"><span>✏️</span></button>
+                    <button class="tool-btn" onclick="setTool('measure')" id="toolMeasure" title="Measure"><span>📏</span></button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="tool-btn" onclick="setDrawColor('#ef4444')" style="color:#ef4444" title="Red"><span>●</span></button>
+                    <button class="tool-btn" onclick="setDrawColor('#22c55e')" style="color:#22c55e" title="Green"><span>●</span></button>
+                    <button class="tool-btn" onclick="setDrawColor('#3b82f6')" style="color:#3b82f6" title="Blue"><span>●</span></button>
+                    <button class="tool-btn" onclick="setDrawColor('#fbbf24')" style="color:#fbbf24" title="Yellow"><span>●</span></button>
+                </div>
+                
+                <div class="toolbar-group">
+                    <button class="tool-btn" onclick="clearAnnotations()" title="Clear">🗑️</button>
+                    <button class="tool-btn" onclick="undoAnnotation()" title="Undo">↩️</button>
+                </div>
+                
+                <div class="zoom-controls">
+                    <button class="tool-btn" onclick="zoomOut()">−</button>
+                    <span id="zoomLevel">100%</span>
+                    <button class="tool-btn" onclick="zoomIn()">+</button>
+                    <button class="tool-btn" onclick="fitToScreen()">⊡</button>
+                </div>
+                
+                <div class="toolbar-group" style="margin-left:auto">
+                    <button class="tool-btn" onclick="rotateImage(-90)">↺</button>
+                    <button class="tool-btn" onclick="rotateImage(90)">↻</button>
+                    <button class="tool-btn" onclick="flipImage()">↔</button>
+                </div>
+            </div>
+            
+            <div class="image-container" id="imageContainer">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-state-icon">🖼️</div>
+                    <p>Upload an image to get started</p>
+                    <p style="font-size:0.8rem; margin-top:0.5rem">Supported: JPG, PNG, DICOM</p>
+                </div>
+                <canvas id="imageCanvas" class="draw-canvas"></canvas>
+            </div>
+            
+            <div class="status-bar">
+                <span id="imageInfo">No image loaded</span>
+                <span>Local Storage: <span id="storageInfo">0 studies</span></span>
+            </div>
+        </div>
+
+        <!-- Annotations Panel -->
+        <div class="annotations-panel">
+            <div class="annotation-tabs">
+                <button class="annotation-tab active" onclick="setAnnotationTab('notes')" id="tabNotes">Notes</button>
+                <button class="annotation-tab" onclick="setAnnotationTab('findings')" id="tabFindings">Findings</button>
+                <button class="annotation-tab" onclick="setAnnotationTab('measure')" id="tabMeasure">Measure</button>
+            </div>
+            
+            <div class="annotation-content" id="annotationNotes">
+                <div class="notes-section">
+                    <h3>Physician Notes</h3>
+                    <textarea class="notes-textarea" id="physicianNotes" placeholder="Enter clinical notes..." onchange="saveNotes()"></textarea>
+                </div>
+                <div class="notes-section">
+                    <h3>Impression</h3>
+                    <textarea class="notes-textarea" id="impression" placeholder="Enter impression/findings..." onchange="saveNotes()" style="min-height:60px"></textarea>
+                </div>
+                <div class="notes-section">
+                    <button class="btn btn-primary" onclick="exportReport()" style="width:100%">📄 Export PDF Report</button>
+                </div>
+            </div>
+            
+            <div class="annotation-content" id="annotationFindings" style="display:none">
+                <div class="findings-list" id="findingsList">
+                    <p style="color:#64748b; font-size:0.85rem">Select drawing tool to mark findings</p>
+                </div>
+            </div>
+            
+            <div class="annotation-content" id="annotationMeasure" style="display:none">
+                <div class="measurements" id="measurementsList">
+                    <!-- Measurements will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- New Study Modal -->
+    <div class="modal" id="newStudyModal">
+        <div class="modal-content">
+            <h2>Add New Study</h2>
+            <div class="form-group">
+                <label>Patient Name</label>
+                <input type="text" id="patientName" placeholder="Enter patient name">
+            </div>
+            <div class="form-group">
+                <label>Modality</label>
+                <select id="studyModality">
+                    <option value="X-Ray">X-Ray</option>
+                    <option value="MRI">MRI</option>
+                    <option value="CT">CT Scan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Body Part</label>
+                <select id="bodyPart">
+                    <option value="Chest">Chest</option>
+                    <option value="Brain">Brain</option>
+                    <option value="Knee">Knee</option>
+                    <option value="Shoulder">Shoulder</option>
+                    <option value="Spine">Spine</option>
+                    <option value="Abdomen">Abdomen</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Study Date</label>
+                <input type="date" id="studyDate">
+            </div>
+            <div class="form-group">
+                <label>Clinical History</label>
+                <textarea id="clinicalHistory" placeholder="Brief clinical history..." style="width:100%; min-height:60px; padding:0.5rem; background:#0f172a; border:1px solid #334155; border-radius:6px; color:#e2e8f0;"></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveStudy()">Save Study</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let studies = [];
+        let currentStudy = null;
+        let currentImage = null;
+        let zoom = 1;
+        let rotation = 0;
+        let flipH = false;
+        let currentTool = 'pan';
+        let drawColor = '#ef4444';
+        let annotations = [];
+        let isDrawing = false;
+        let startPos = { x: 0, y: 0 };
+        let panOffset = { x: 0, y: 0 };
+        
+        const SUPABASE_URL = 'https://vodhhauwowkalvaxzqyv.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvZGhoYXV3b3drYWx2YXh6cXl2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYyNzIwMDAsImV4cCI6MjA2MTg0ODAwMH0.fake_anon_key';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadStudies();
+            setupDragDrop();
+            document.getElementById('studyDate').value = new Date().toISOString().split('T')[0];
+        });
+        
+        // Load studies from local storage
+        function loadStudies() {
+            const stored = localStorage.getItem('medview_studies');
+            if (stored) {
+                studies = JSON.parse(stored);
+                renderStudiesList();
+            }
+            updateStorageInfo();
+        }
+        
+        // Save studies to local storage
+        function saveStudies() {
+            localStorage.setItem('medview_studies', JSON.stringify(studies));
+            updateStorageInfo();
+        }
+        
+        function updateStorageInfo() {
+            document.getElementById('storageInfo').textContent = `${studies.length} studies`;
+        }
+        
+        // Setup drag and drop
+        function setupDragDrop() {
+            const uploadArea = document.getElementById('uploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const file = e.dataTransfer.files[0];
+                if (file) handleFile(file);
+            });
+        }
+        
+        // Handle file selection
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) handleFile(file);
+        }
+        
+        // Process uploaded file
+        function handleFile(file) {
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file (JPG, PNG)');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    showNewStudyModal();
+                    
+                    // Store image data temporarily
+                    window.pendingImageData = e.target.result;
+                    window.pendingImageName = file.name;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Render studies list
+        function renderStudiesList() {
+            const list = document.getElementById('studiesList');
+            list.innerHTML = '';
+            
+            const filter = document.getElementById('filterModality').value;
+            const filtered = filter ? studies.filter(s => s.modality === filter) : studies;
+            
+            filtered.forEach((study, index) => {
+                const item = document.createElement('div');
+                item.className = `study-item ${currentStudy?.id === study.id ? 'active' : ''}`;
+                item.onclick = () => loadStudy(study);
+                
+                const modClass = study.modality.toLowerCase().replace('-', '').replace(' ', '');
+                
+                item.innerHTML = `
+                    <div class="date">${formatDate(study.date)}</div>
+                    <div class="name">${study.patientName}</div>
+                    <span class="modality ${modClass}">${study.modality}</span>
+                    <span class="modality" style="background:#334155">${study.bodyPart}</span>
+                `;
+                list.appendChild(item);
+            });
+            
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="color:#64748b; text-align:center; padding:1rem; font-size:0.85rem">No studies yet</p>';
+            }
+        }
+        
+        // Load a study
+        function loadStudy(study) {
+            currentStudy = study;
+            renderStudiesList();
+            
+            // Load image
+            if (study.imageData) {
+                const img = new Image();
+                img.onload = () => {
+                    currentImage = img;
+                    renderImage();
+                };
+                img.src = study.imageData;
+            }
+            
+            // Load notes
+            document.getElementById('physicianNotes').value = study.notes || '';
+            document.getElementById('impression').value = study.impression || '';
+            
+            // Load annotations
+            annotations = study.annotations || [];
+            renderAnnotations();
+            
+            // Hide empty state
+            document.getElementById('emptyState').style.display = 'none';
+            
+            updateImageInfo();
+        }
+        
+        // Render image on canvas
+        function renderImage() {
+            if (!currentImage) return;
+            
+            const canvas = document.getElementById('imageCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Set canvas size to match image
+            canvas.width = currentImage.width;
+            canvas.height = currentImage.height;
+            
+            // Clear and transform
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            
+            // Apply transforms
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            ctx.translate(centerX + panOffset.x, centerY + panOffset.y);
+            ctx.rotate(rotation * Math.PI / 180);
+            if (flipH) ctx.scale(-1, 1);
+            ctx.scale(zoom, zoom);
+            ctx.translate(-centerX, -centerY);
+            
+            // Draw image
+            ctx.drawImage(currentImage, 0, 0);
+            
+            // Draw annotations
+            annotations.forEach(ann => {
+                ctx.strokeStyle = ann.color;
+                ctx.lineWidth = 3;
+                if (ann.type === 'line') {
+                    ctx.beginPath();
+                    ctx.moveTo(ann.x1, ann.y1);
+                    ctx.lineTo(ann.x2, ann.y2);
+                    ctx.stroke();
+                } else if (ann.type === 'rect') {
+                    ctx.strokeRect(ann.x, ann.y, ann.w, ann.h);
+                } else if (ann.type === 'circle') {
+                    ctx.beginPath();
+                    ctx.arc(ann.x, ann.y, ann.r, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+            });
+            
+            ctx.restore();
+        }
+        
+        // Show new study modal
+        function showNewStudyModal() {
+            document.getElementById('newStudyModal').classList.add('show');
+        }
+        
+        // Close modal
+        function closeModal() {
+            document.getElementById('newStudyModal').classList.remove('show');
+        }
+        
+        // Save study
+        function saveStudy() {
+            const patientName = document.getElementById('patientName').value || 'Unknown';
+            const modality = document.getElementById('studyModality').value;
+            const bodyPart = document.getElementById('bodyPart').value;
+            const studyDate = document.getElementById('studyDate').value;
+            const clinicalHistory = document.getElementById('clinicalHistory').value;
+            
+            const study = {
+                id: Date.now(),
+                patientName,
+                modality,
+                bodyPart,
+                date: studyDate,
+                clinicalHistory,
+                notes: document.getElementById('physicianNotes').value,
+                impression: document.getElementById('impression').value,
+                annotations: annotations,
+                imageData: window.pendingImageData || null
+            };
+            
+            studies.unshift(study);
+            saveStudies();
+            renderStudiesList();
+            loadStudy(study);
+            
+            // Clear pending
+            window.pendingImageData = null;
+            window.pendingImageName = null;
+            
+            // Reset form
+            document.getElementById('patientName').value = '';
+            document.getElementById('clinicalHistory').value = '';
+            closeModal();
+        }
+        
+        // Save notes
+        function saveNotes() {
+            if (!currentStudy) return;
+            currentStudy.notes = document.getElementById('physicianNotes').value;
+            currentStudy.impression = document.getElementById('impression').value;
+            currentStudy.annotations = annotations;
+            
+            const index = studies.findIndex(s => s.id === currentStudy.id);
+            if (index !== -1) {
+                studies[index] = currentStudy;
+                saveStudies();
+            }
+        }
+        
+        // Filter studies
+        function filterStudies() {
+            renderStudiesList();
+        }
+        
+        // Zoom controls
+        function zoomIn() {
+            zoom = Math.min(zoom * 1.25, 5);
+            renderImage();
+            updateZoomLevel();
+        }
+        
+        function zoomOut() {
+            zoom = Math.max(zoom / 1.25, 0.1);
+            renderImage();
+            updateZoomLevel();
+        }
+        
+        function fitToScreen() {
+            zoom = 1;
+            panOffset = { x: 0, y: 0 };
+            renderImage();
+            updateZoomLevel();
+        }
+        
+        function updateZoomLevel() {
+            document.getElementById('zoomLevel').textContent = Math.round(zoom * 100) + '%';
+        }
+        
+        // Rotation and flip
+        function rotateImage(deg) {
+            rotation += deg;
+            renderImage();
+        }
+        
+        function flipImage() {
+            flipH = !flipH;
+            renderImage();
+        }
+        
+        // Tools
+        function setTool(tool) {
+            currentTool = tool;
+            document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('tool' + tool.charAt(0).toUpperCase() + tool.slice(1)).classList.add('active');
+        }
+        
+        function setDrawColor(color) {
+            drawColor = color;
+        }
+        
+        // Canvas mouse events for drawing
+        const canvas = document.getElementById('imageCanvas');
+        
+        canvas.addEventListener('mousedown', (e) => {
+            if (currentTool === 'draw' || currentTool === 'measure') {
+                isDrawing = true;
+                const rect = canvas.getBoundingClientRect();
+                startPos = {
+                    x: (e.clientX - rect.left) / zoom,
+                    y: (e.clientY - rect.top) / zoom
+                };
+            } else if (currentTool === 'pan') {
+                isDrawing = true;
+                startPos = { x: e.clientX, y: e.clientY };
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!isDrawing) return;
+            
+            if (currentTool === 'pan') {
+                panOffset.x += e.clientX - startPos.x;
+                panOffset.y += e.clientY - startPos.y;
+                startPos = { x: e.clientX, y: e.clientY };
+                renderImage();
+            }
+        });
+        
+        canvas.addEventListener('mouseup', (e) => {
+            if (!isDrawing) return;
+            
+            if (currentTool === 'draw') {
+                const rect = canvas.getBoundingClientRect();
+                const endPos = {
+                    x: (e.clientX - rect.left) / zoom,
+                    y: (e.clientY - rect.top) / zoom
+                };
+                
+                annotations.push({
+                    type: 'line',
+                    x1: startPos.x,
+                    y1: startPos.y,
+                    x2: endPos.x,
+                    y2: endPos.y,
+                    color: drawColor
+                });
+                renderImage();
+                renderAnnotations();
+            } else if (currentTool === 'measure') {
+                const rect = canvas.getBoundingClientRect();
+                const endPos = {
+                    x: (e.clientX - rect.left) / zoom,
+                    y: (e.clientY - rect.top) / zoom
+                };
+                
+                const pixels = Math.sqrt(Math.pow(endPos.x - startPos.x, 2) + Math.pow(endPos.y - startPos.y, 2));
+                const mm = pixels * 0.5; // Approximate conversion
+                
+                annotations.push({
+                    type: 'line',
+                    x1: startPos.x,
+                    y1: startPos.y,
+                    x2: endPos.x,
+                    y2: endPos.y,
+                    color: drawColor,
+                    measurement: mm.toFixed(1) + ' mm'
+                });
+                renderImage();
+                renderAnnotations();
+            }
+            
+            isDrawing = false;
+        });
+        
+        // Render annotations list
+        function renderAnnotations() {
+            const list = document.getElementById('findingsList');
+            list.innerHTML = '';
+            
+            annotations.forEach((ann, i) => {
+                const item = document.createElement('div');
+                item.className = 'finding-item';
+                item.innerHTML = `
+                    <div class="label" style="color:${ann.color}">Finding ${i + 1}${ann.measurement ? ' - ' + ann.measurement : ''}</div>
+                    <div class="text">${ann.type} annotation</div>
+                `;
+                list.appendChild(item);
+            });
+            
+            // Update measurements
+            const mList = document.getElementById('measurementsList');
+            mList.innerHTML = '';
+            const measures = annotations.filter(a => a.measurement);
+            measures.forEach((m, i) => {
+                const item = document.createElement('div');
+                item.className = 'measurement-item';
+                item.innerHTML = `<span>Measurement ${i + 1}</span><span class="value">${m.measurement}</span>`;
+                mList.appendChild(item);
+            });
+            
+            if (annotations.length === 0) {
+                list.innerHTML = '<p style="color:#64748b; font-size:0.85rem">Use draw tool to mark findings</p>';
+            }
+        }
+        
+        // Clear annotations
+        function clearAnnotations() {
+            annotations = [];
+            renderImage();
+            renderAnnotations();
+            saveNotes();
+        }
+        
+        // Undo annotation
+        function undoAnnotation() {
+            annotations.pop();
+            renderImage();
+            renderAnnotations();
+            saveNotes();
+        }
+        
+        // Annotation tabs
+        function setAnnotationTab(tab) {
+            document.querySelectorAll('.annotation-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active');
+            
+            document.getElementById('annotationNotes').style.display = tab === 'notes' ? 'block' : 'none';
+            document.getElementById('annotationFindings').style.display = tab === 'findings' ? 'block' : 'none';
+            document.getElementById('annotationMeasure').style.display = tab === 'measure' ? 'block' : 'none';
+        }
+        
+        // Export PDF report
+        function exportReport() {
+            if (!currentStudy) {
+                alert('No study selected');
+                return;
+            }
+            
+            let report = `
+MRI/X-RAY STUDY REPORT
+====================
+Patient: ${currentStudy.patientName}
+Date: ${formatDate(currentStudy.date)}
+Modality: ${currentStudy.modality}
+Body Part: ${currentStudy.bodyPart}
+
+CLINICAL HISTORY
+=================
+${currentStudy.clinicalHistory || 'Not provided'}
+
+PHYSICIAN NOTES
+=================
+${currentStudy.notes || 'None'}
+
+IMPRESSION
+===========
+${currentStudy.impression || 'None'}
+            `;
+            
+            // Download as text file
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `study_${currentStudy.patientName}_${currentStudy.date}.txt`;
+            a.click();
+        }
+        
+        // Update image info
+        function updateImageInfo() {
+            if (!currentImage) return;
+            const info = `${currentImage.width} x ${currentImage.height} px`;
+            document.getElementById('imageInfo').textContent = info + (currentStudy ? ` | ${currentStudy.patientName} | ${currentStudy.modality}` : '');
+        }
+        
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+    </script>
+</body>
+</html>

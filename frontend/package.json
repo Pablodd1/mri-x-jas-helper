@@ -4,8 +4,9 @@
   "description": "MedView Pro - Medical Imaging Viewer",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "npx --yes serve public -l 3002",
+    "start": "npx --yes serve public -l 3002",
+    "build": "echo 'Static build complete'"
   },
   "dependencies": {
     "express": "^4.18.2",

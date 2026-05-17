@@ -5,820 +5,868 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>AIMS VISION PRO — Radiology Workstation</title>
 <style>
-:root {
-  --bg: #06060a; --panel: #0d0d18; --border: #1a1a30;
-  --accent: #4ade80; --gold: #c9a84c; --text: #d4d4d8; --sub: #71717a;
-  --danger: #ef4444; --blue: #60a5fa; --purple: #a78bfa; --orange: #fb923c;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--text); font-family:system-ui, sans-serif; min-height:100vh; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+.header { background: #1e293b; border-bottom: 2px solid #3b82f6; padding: 12px 24px; display: flex; align-items: center; justify-content: space-between; }
+.header h1 { font-size: 1.2em; color: #60a5fa; display: flex; align-items: center; gap: 8px; }
+.header .badge { background: #3b82f6; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 0.75em; }
 
-/* Progress Bar */
-.progress { display:flex; background:var(--panel); border-bottom:1px solid var(--border); padding:0; }
-.progress .step { flex:1; padding:14px 16px; text-align:center; font-size:11px; color:var(--sub); border-bottom:3px solid transparent; transition:all .3s; cursor:default; }
-.progress .step.active { color:var(--accent); border-bottom-color:var(--accent); }
-.progress .step.done { color:var(--blue); border-bottom-color:var(--blue); }
-.progress .step .num { display:inline-block; width:22px; height:22px; border-radius:50%; border:2px solid var(--sub); line-height:18px; margin-right:6px; font-size:11px; font-weight:700; }
-.progress .step.active .num { border-color:var(--accent); background:var(--accent); color:#000; }
-.progress .step.done .num { border-color:var(--blue); background:var(--blue); color:#000; }
+.container { max-width: 1100px; margin: 0 auto; padding: 20px; }
 
-/* Main */
-main { max-width:900px; margin:0 auto; padding:32px 24px; }
-.step-panel { display:none; }
-.step-panel.active { display:block; }
+/* Step indicator */
+.steps { display: flex; gap: 4px; margin-bottom: 24px; }
+.step { flex: 1; text-align: center; padding: 10px 8px; background: #1e293b; border-radius: 8px; font-size: 0.75em; color: #64748b; cursor: pointer; transition: all 0.2s; border: 2px solid transparent; }
+.step.active { background: #1e3a5f; color: #60a5fa; border-color: #3b82f6; }
+.step.done { background: #14532d; color: #4ade80; border-color: #22c55e; }
+.step .num { display: block; font-size: 1.5em; font-weight: bold; }
 
-/* Headers */
-h1 { font-size:24px; margin-bottom:4px; }
-h1 span { color:var(--accent); }
-.subtitle { color:var(--sub); font-size:13px; margin-bottom:32px; }
-
-/* Cards */
-.card { background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:24px; margin-bottom:20px; }
-.card h2 { font-size:13px; color:var(--sub); text-transform:uppercase; letter-spacing:1px; margin-bottom:16px; }
-.card h3 { font-size:12px; color:var(--blue); margin-bottom:8px; }
-
-/* Upload Zones */
-.upload-zone { border:2px dashed var(--border); border-radius:12px; padding:40px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:12px; }
-.upload-zone:hover, .upload-zone.dragover { border-color:var(--accent); background:rgba(74,222,128,.03); }
-.upload-zone .icon { font-size:36px; margin-bottom:8px; }
-.upload-zone p { font-size:13px; color:var(--sub); }
-.upload-zone .hint { font-size:10px; color:var(--sub); margin-top:4px; }
-
-/* Camera Capture */
-.camera-area { position:relative; border-radius:12px; overflow:hidden; margin-bottom:12px; }
-.camera-area video { width:100%; border-radius:12px; }
-.camera-area .capture-btn { position:absolute; bottom:16px; left:50%; transform:translateX(-50%); padding:12px 28px; border-radius:24px; background:var(--accent); color:#000; border:none; font-weight:700; cursor:pointer; }
-
-/* Multi-file list */
-.file-list { margin-top:8px; }
-.file-item { display:flex; align-items:center; gap:10px; padding:8px 12px; background:var(--bg); border:1px solid var(--border); border-radius:8px; margin-bottom:6px; font-size:12px; }
-.file-item .name { flex:1; }
-.file-item .size { color:var(--sub); font-size:11px; }
-.file-item .remove { color:var(--danger); cursor:pointer; font-size:14px; }
+/* Panels */
+.panel { display: none; background: #1e293b; border-radius: 12px; padding: 24px; border: 1px solid #334155; }
+.panel.active { display: block; }
+.panel h2 { font-size: 1.3em; margin-bottom: 16px; color: #93c5fd; }
+.panel label { display: block; font-size: 0.8em; color: #94a3b8; margin: 10px 0 4px; }
+.panel input, .panel select, .panel textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; color: #e2e8f0; font-size: 0.9em; }
+.panel textarea { min-height: 100px; resize: vertical; }
+.panel select { cursor: pointer; }
 
 /* Buttons */
-.btn { padding:10px 20px; border-radius:8px; border:none; font-size:13px; font-weight:600; cursor:pointer; transition:all .2s; }
-.btn:disabled { opacity:0.4; cursor:not-allowed; }
-.btn-primary { background:var(--accent); color:#000; }
-.btn-primary:hover:not(:disabled) { opacity:0.85; }
-.btn-secondary { background:var(--border); color:var(--text); }
-.btn-blue { background:var(--blue); color:#000; }
-.btn-purple { background:var(--purple); color:#000; }
-.btn-danger { background:var(--danger); color:#fff; }
-.btn-row { display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; }
+.btn { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 0.9em; font-weight: 600; transition: all 0.2s; }
+.btn-primary { background: #3b82f6; color: #fff; }
+.btn-primary:hover { background: #2563eb; }
+.btn-success { background: #22c55e; color: #fff; }
+.btn-success:hover { background: #16a34a; }
+.btn-danger { background: #ef4444; color: #fff; }
+.btn-outline { background: transparent; border: 1px solid #475569; color: #94a3b8; }
+.btn-outline:hover { background: #1e293b; color: #e2e8f0; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-row { display: flex; gap: 10px; margin-top: 20px; justify-content: space-between; }
 
-/* Forms */
-.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
-.form-group { display:flex; flex-direction:column; gap:4px; }
-.form-group label { font-size:10px; color:var(--sub); text-transform:uppercase; letter-spacing:1px; }
-.form-group input, .form-group textarea, .form-group select {
-  background:var(--bg); border:1px solid var(--border); border-radius:6px;
-  padding:10px 12px; color:var(--text); font-size:13px; outline:none;
-}
-.form-group input:focus, .form-group textarea:focus { border-color:var(--accent); }
-.form-group textarea { min-height:80px; resize:vertical; font-family:inherit; }
+/* Upload zone */
+.upload-zone { border: 2px dashed #475569; border-radius: 12px; padding: 40px; text-align: center; cursor: pointer; transition: all 0.2s; }
+.upload-zone:hover { border-color: #3b82f6; background: #1e3a5f; }
+.upload-zone .icon { font-size: 3em; margin-bottom: 8px; }
+.file-list { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 8px; }
+.file-list .tag { background: #1e3a5f; padding: 4px 12px; border-radius: 6px; font-size: 0.8em; display: flex; align-items: center; gap: 6px; }
+.file-list .tag .remove { cursor: pointer; color: #ef4444; }
 
-/* Results */
-.result-box { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:16px; margin-bottom:12px; }
-.result-box .label { font-size:10px; color:var(--sub); text-transform:uppercase; margin-bottom:8px; }
-.result-box .value { font-size:12px; line-height:1.6; white-space:pre-wrap; }
-.findings-list { max-height:300px; overflow-y:auto; }
-.finding-item { background:var(--bg); border-left:3px solid var(--accent); padding:10px 14px; margin-bottom:8px; border-radius:0 8px 8px 0; }
-.finding-item .idx { font-size:10px; color:var(--sub); }
-.finding-item .content { font-size:12px; line-height:1.5; white-space:pre-wrap; margin-top:4px; }
+/* Cards */
+.card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+.card h3 { font-size: 0.95em; color: #93c5fd; margin-bottom: 8px; }
 
-/* Report page */
-.report { background:#fff; color:#111; padding:40px; font-family:Georgia,serif; font-size:12px; line-height:1.7; border-radius:8px; max-height:70vh; overflow-y:auto; }
-.report h1 { font-size:20px; text-align:center; color:#111; }
-.report .meta { display:flex; justify-content:space-between; font-size:10px; color:#666; margin:16px 0; border-bottom:1px solid #ccc; padding-bottom:10px; }
-.report .section { margin:12px 0; white-space:pre-wrap; }
-.report .footer { margin-top:32px; border-top:1px solid #ccc; padding-top:10px; font-size:9px; color:#999; text-align:center; }
+/* Side-by-side */
+.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.compare .col { background: #0f172a; border-radius: 10px; padding: 16px; border: 1px solid #334155; }
+.compare .col h3 { font-size: 0.9em; margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px solid #334155; }
+.compare .col.ai h3 { color: #60a5fa; }
+.compare .col.doctor h3 { color: #4ade80; }
+
+/* Findings match */
+.match-card { display: flex; align-items: start; gap: 10px; padding: 10px; background: #0f172a; border: 1px solid #334155; border-radius: 8px; margin-bottom: 8px; }
+.match-card .score { background: #3b82f6; color: #fff; padding: 2px 8px; border-radius: 6px; font-size: 0.7em; font-weight: bold; min-width: 45px; text-align: center; }
+.match-card .codes { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+.match-card .code-tag { background: #1e3a5f; padding: 2px 8px; border-radius: 4px; font-size: 0.7em; font-family: monospace; color: #93c5fd; }
+
+/* Red flags */
+.flag { padding: 10px 14px; border-radius: 8px; margin-bottom: 8px; border-left: 4px solid; }
+.flag.critical { background: #450a0a; border-color: #ef4444; }
+.flag.warning { background: #422006; border-color: #f59e0b; }
+.flag.info { background: #1e3a5f; border-color: #3b82f6; }
 
 /* Dictation */
-.mic-btn { padding:8px 20px; border-radius:20px; border:none; font-size:12px; font-weight:600; cursor:pointer; }
-.mic-btn.off { background:var(--border); color:var(--sub); }
-.mic-btn.on { background:var(--danger); color:#fff; animation:pulse 1.5s infinite; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.6} }
+.dictation-bar { display: flex; gap: 10px; align-items: center; }
+.recording { animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+/* Preview */
+.preview-box { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 20px; max-height: 500px; overflow-y: auto; line-height: 1.6; white-space: pre-wrap; font-size: 0.9em; }
 
 /* Loading */
-.loading { text-align:center; padding:30px; display:none; }
-.loading.show { display:block; }
-.spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin 1s linear infinite; margin:0 auto 12px; }
-@keyframes spin { to { transform:rotate(360deg); } }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #475569; border-top-color: #3b82f6; border-radius: 50%; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-/* Status */
-.status-bar { background:var(--panel); border-top:1px solid var(--border); padding:10px 24px; font-size:11px; color:var(--sub); display:flex; justify-content:space-between; align-items:center; position:fixed; bottom:0; left:0; right:0; }
-.toast { position:fixed; bottom:60px; right:24px; background:var(--accent); color:#000; padding:12px 24px; border-radius:8px; font-size:13px; font-weight:600; z-index:300; opacity:0; transition:opacity .3s; pointer-events:none; }
-.toast.show { opacity:1; }
+/* Image preview */
+.img-preview { max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #334155; margin-top: 8px; }
+.video-preview { max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px; }
 
-/* Tabs */
-.tabs { display:flex; gap:0; margin-bottom:16px; }
-.tab { padding:8px 16px; font-size:11px; color:var(--sub); border-bottom:2px solid transparent; cursor:pointer; }
-.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
-
-/* History */
-.history-table { width:100%; border-collapse:collapse; font-size:11px; }
-.history-table th { text-align:left; padding:8px 12px; color:var(--sub); border-bottom:1px solid var(--border); text-transform:uppercase; font-size:10px; }
-.history-table td { padding:8px 12px; border-bottom:1px solid var(--border); }
-.history-table tr:hover { background:rgba(255,255,255,.02); }
-.history-table .id { color:var(--accent); cursor:pointer; }
-.search-bar { display:flex; gap:8px; margin-bottom:16px; }
-.search-bar input { flex:1; background:var(--bg); border:1px solid var(--border); border-radius:6px; padding:8px 12px; color:var(--text); font-size:12px; }
+.hidden { display: none; }
 </style>
 </head>
 <body>
-
-<!-- Progress -->
-<div class="progress" id="progress">
-  <div class="step active" data-step="1"><span class="num">1</span>Prescription</div>
-  <div class="step" data-step="2"><span class="num">2</span>Review & Confirm</div>
-  <div class="step" data-step="3"><span class="num">3</span>Images</div>
-  <div class="step" data-step="4"><span class="num">4</span>AI Analysis</div>
-  <div class="step" data-step="5"><span class="num">5</span>Generate Note</div>
-  <div class="step" style="flex:0;padding:14px 20px" onclick="showHistory()"><span style="cursor:pointer;color:var(--blue);font-size:11px">📋 History</span></div>
+<div class="header">
+  <h1>🧠 AIMS VISION PRO</h1>
+  <div><span class="badge" id="statusBadge">Ready</span></div>
 </div>
 
-<main>
-  <!-- STEP 1: Prescription Capture -->
-  <div class="step-panel active" id="step1">
-    <h1><span>AIMS</span> VISION PRO</h1>
-    <p class="subtitle">Step 1 — Capture the prescription or referral order</p>
+<div class="container">
 
-    <!-- AIMS Login -->
-    <div class="card" id="loginCard" style="border-color:var(--blue);background:rgba(96,165,250,.03)">
-      <h2 style="color:var(--blue)">🔐 AIMS Login — Link to Your Account</h2>
-      <div style="display:flex;gap:10px;align-items:end;flex-wrap:wrap">
-        <div class="form-group" style="flex:1"><label>Username</label><input id="loginUser" placeholder="doctor" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:12px"></div>
-        <div class="form-group" style="flex:1"><label>Password</label><input id="loginPass" type="password" placeholder="••••••••" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:12px"></div>
-        <button class="btn btn-blue" onclick="aimsLogin()" style="margin-bottom:0">Login</button>
-        <button class="btn btn-secondary" onclick="skipLogin()" style="margin-bottom:0;font-size:11px">Offline Mode</button>
-      </div>
-      <div id="loginStatus" style="font-size:11px;margin-top:8px;color:var(--sub)"></div>
-    </div>
-
-    <div class="card" style="border-color:var(--purple);background:rgba(167,139,250,.03)">
-      <h2 style="color:var(--purple)">⚡ Quick Demo — Pre-loaded Cases</h2>
-      <p style="font-size:12px;color:var(--sub);margin-bottom:12px">Skip manual steps and run a fully automated demo with mock MRI or X-ray data + 3-agent AI verification</p>
-      <div id="demoCases" style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-purple" onclick="runDemo('knee_mri')">🦵 Knee MRI — Meniscus Tear</button>
-        <button class="btn btn-purple" onclick="runDemo('chest_xray')">🫁 Chest X-Ray — Pneumonia</button>
-      </div>
-      <div class="loading" id="demoLoading" style="margin-top:16px">
-        <div class="spinner"></div>
-        <p id="demoStatus">Running demo pipeline...</p>
-      </div>
-      <div id="demoResult" style="display:none;margin-top:16px"></div>
-    </div>
-
-    <div class="card">
-      <h2>📋 Upload Prescription</h2>
-      <p style="font-size:12px;color:var(--sub);margin-bottom:12px">Take a photo of the prescription with your phone, or upload the referral PDF/image</p>
-
-      <div class="tabs">
-        <div class="tab active" onclick="switchTab('upload')">📤 Upload File</div>
-        <div class="tab" onclick="switchTab('camera')">📸 Take Photo</div>
-      </div>
-
-      <div id="tab-upload">
-        <label class="upload-zone" for="prescriptionFile">
-          <div class="icon">📄</div>
-          <p>Click to upload prescription</p>
-          <p class="hint">PDF, JPG, PNG — photo of paper Rx, printed referral, or digital order</p>
-        </label>
-        <input type="file" id="prescriptionFile" accept="image/*,.pdf" style="display:none" onchange="handlePrescriptionFile(this.files[0])">
-        <div class="file-list" id="prescriptionFileList"></div>
-      </div>
-
-      <div id="tab-camera" style="display:none">
-        <div class="camera-area">
-          <video id="cameraVideo" autoplay playsinline></video>
-          <button class="capture-btn" onclick="capturePhoto()">📸 Capture Rx</button>
-        </div>
-        <canvas id="cameraCanvas" style="display:none"></canvas>
-      </div>
-
-      <div class="btn-row">
-        <button class="btn btn-primary" id="analyzeRxBtn" disabled onclick="analyzePrescription()">🔍 Analyze Prescription</button>
-      </div>
-    </div>
-
-    <div class="loading" id="step1Loading">
-      <div class="spinner"></div>
-      <p>Analyzing prescription with AI...</p>
-    </div>
+  <!-- Step Indicator -->
+  <div class="steps" id="stepIndicator">
+    <div class="step active" onclick="goToStep(1)"><span class="num">1</span>Patient & Visit</div>
+    <div class="step" onclick="goToStep(2)"><span class="num">2</span>Documents</div>
+    <div class="step" onclick="goToStep(3)"><span class="num">3</span>Images & Analysis</div>
+    <div class="step" onclick="goToStep(4)"><span class="num">4</span>Review & Compare</div>
+    <div class="step" onclick="goToStep(5)"><span class="num">5</span>Codes & Flags</div>
+    <div class="step" onclick="goToStep(6)"><span class="num">6</span>Finalize & Save</div>
   </div>
 
-  <!-- STEP 2: Review Prescription -->
-  <div class="step-panel" id="step2">
-    <h1><span>AIMS</span> VISION PRO</h1>
-    <p class="subtitle">Step 2 — Review and confirm extracted information</p>
-
-    <div class="card">
-      <h2>📋 Extracted Prescription Data</h2>
-      <p style="font-size:11px;color:var(--orange);margin-bottom:16px">⚠️ AI-extracted — please review and correct if needed</p>
-      <div class="form-grid" id="prescriptionForm">
-        <div class="form-group"><label>Exam Type</label><select id="rxExamType"><option>MRI</option><option>X-ray</option><option>CT</option><option>Ultrasound</option><option>Other</option></select></div>
-        <div class="form-group"><label>Body Region</label><input id="rxBodyRegion" placeholder="e.g. Left Knee"></div>
-        <div class="form-group"><label>Clinical Indication</label><input id="rxIndication" placeholder="Why exam is ordered"></div>
-        <div class="form-group"><label>Suspected Diagnosis</label><input id="rxDiagnosis" placeholder="Working diagnosis"></div>
-        <div class="form-group"><label>Urgency</label><select id="rxUrgency"><option>routine</option><option>urgent</option><option>stat</option></select></div>
-        <div class="form-group"><label>Contrast</label><select id="rxContrast"><option>not specified</option><option>without contrast</option><option>with contrast</option><option>both</option></select></div>
-        <div class="form-group" style="grid-column:1/-1"><label>Special Instructions</label><input id="rxInstructions" placeholder="Specific views, protocols, notes"></div>
-        <div class="form-group"><label>Referring Physician</label><input id="rxPhysician" placeholder="Doctor name"></div>
-        <div class="form-group"><label>Facility</label><input id="rxFacility" placeholder="Hospital or clinic"></div>
+  <!-- STEP 1: Patient & Visit -->
+  <div class="panel active" id="panel1">
+    <h2>📋 Patient Demographics & Visit Info</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+      <div>
+        <label>First Name *</label>
+        <input type="text" id="firstName" placeholder="John">
       </div>
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="goToStep(1)">← Back</button>
-        <button class="btn btn-primary" onclick="confirmPrescription()">✅ Confirm & Continue →</button>
+      <div>
+        <label>Last Name *</label>
+        <input type="text" id="lastName" placeholder="Doe">
       </div>
-    </div>
-  </div>
-
-  <!-- STEP 3: Image Upload -->
-  <div class="step-panel" id="step3">
-    <h1><span>AIMS</span> VISION PRO</h1>
-    <p class="subtitle" id="step3Subtitle">Step 3 — Upload medical images for analysis</p>
-
-    <div class="card">
-      <h2>🔬 Medical Images</h2>
-      <p style="font-size:12px;color:var(--sub);margin-bottom:12px">
-        Upload MRI slices, X-ray images, or CT scans. Multi-file supported.
-      </p>
-
-      <label class="upload-zone" for="imageFiles">
-        <div class="icon">🩻</div>
-        <p>Click to upload images</p>
-        <p class="hint">Supports multi-file upload — select all MRI slices at once. JPG, PNG, DICOM, up to 100MB each</p>
-      </label>
-      <input type="file" id="imageFiles" accept="image/*,.dcm" multiple style="display:none" onchange="handleImageFiles(this.files)">
-      <div class="file-list" id="imageFileList"></div>
-
-      <p style="font-size:11px;color:var(--sub);margin-top:8px">
-        Prescription context: <span id="rxContext" style="color:var(--blue)"></span>
-      </p>
-
-      <div class="btn-row">
-        <button class="btn btn-secondary" onclick="goToStep(2)">← Back</button>
-        <button class="btn btn-primary" id="analyzeImagesBtn" disabled onclick="analyzeImages()">🔬 Analyze Images</button>
+      <div>
+        <label>Date of Birth</label>
+        <input type="date" id="dob">
+      </div>
+      <div>
+        <label>Gender</label>
+        <select id="gender"><option value="">Select...</option><option>Male</option><option>Female</option><option>Other</option></select>
+      </div>
+      <div>
+        <label>MRN / Patient ID</label>
+        <input type="text" id="mrn" placeholder="Optional">
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="tel" id="phone" placeholder="(555) 000-0000">
       </div>
     </div>
-
-    <div class="loading" id="step3Loading">
-      <div class="spinner"></div>
-      <p>Analyzing images with llava:13b...</p>
-      <p style="font-size:11px;color:var(--sub)" id="step3Progress"></p>
-    </div>
-  </div>
-
-  <!-- STEP 4: AI Analysis + Correlation -->
-  <div class="step-panel" id="step4">
-    <h1><span>AIMS</span> VISION PRO</h1>
-    <p class="subtitle">Step 4 — AI findings + prescription correlation</p>
-
-    <div class="card">
-      <h2>🧠 AI Image Analysis</h2>
-      <div class="findings-list" id="findingsDisplay"></div>
-    </div>
-
-    <div class="card" id="correlationCard" style="display:none">
-      <h2>🔗 Prescription ↔ Image Correlation</h2>
-      <div class="result-box"><div class="value" id="correlationDisplay"></div></div>
-    </div>
-
-    <div class="card">
-      <h2>📚 ACR Criteria (RAG)</h2>
-      <div id="ragDisplay"></div>
-    </div>
-
-    <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goToStep(3)">← Back</button>
-      <button class="btn btn-purple" id="correlateBtn" onclick="runCorrelation()">🔗 Run Correlation</button>
-      <button class="btn btn-primary" onclick="goToStep(5)">📝 Continue to Note →</button>
-    </div>
-  </div>
-
-  <!-- STEP 5: Generate Medical Note -->
-  <div class="step-panel" id="step5">
-    <h1><span>AIMS</span> VISION PRO</h1>
-    <p class="subtitle">Step 5 — Doctor's notes + final medical report</p>
-
-    <div class="card">
-      <h2>🎤 Doctor's Dictation</h2>
-      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
-        <button class="mic-btn off" id="micBtn" onclick="toggleMic()">🎤 Start Dictation</button>
-        <select id="noteTemplate" style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:8px;color:var(--text);font-size:12px">
-          <option value="DEFAULT">Standard Report</option>
-          <option value="DETAILED">Detailed Report</option>
-          <option value="BRIEF">Brief Summary</option>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+      <div>
+        <label>Visit Type *</label>
+        <select id="visitType" onchange="toggleMVA()">
+          <option value="">Select...</option>
+          <option value="mva">Motor Vehicle Accident</option>
+          <option value="slip_fall">Slip & Fall</option>
+          <option value="workplace">Workplace Injury</option>
+          <option value="sports">Sports Injury</option>
+          <option value="general">General / Other</option>
         </select>
       </div>
-      <textarea id="doctorNotes" placeholder="Type your notes here, or use voice dictation..." style="width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;color:var(--text);font-size:13px;min-height:150px;resize:vertical;outline:none;font-family:inherit;line-height:1.6"></textarea>
+      <div id="mvaFields" class="hidden">
+        <label>Date of Accident</label>
+        <input type="date" id="accidentDate">
+      </div>
+      <div>
+        <label>Referring Physician</label>
+        <input type="text" id="referringPhysician" placeholder="Dr. Name">
+      </div>
+      <div>
+        <label>Facility / Clinic</label>
+        <input type="text" id="facility" placeholder="Clinic name">
+      </div>
     </div>
-
     <div class="btn-row">
-      <button class="btn btn-secondary" onclick="goToStep(4)">← Back</button>
-      <button class="btn btn-primary" id="generateNoteBtn" onclick="generateNote()">📋 Generate Medical Note</button>
-    </div>
-
-    <div class="loading" id="step5Loading">
-      <div class="spinner"></div>
-      <p>Generating medical note with gemma4...</p>
-    </div>
-
-    <div class="card" id="reportCard" style="display:none">
-      <h2>📄 Final Medical Report</h2>
-      <div class="report" id="reportContent"></div>
-      <div class="btn-row">
-        <button class="btn btn-blue" onclick="printReport()">🖨 Print Report</button>
-        <button class="btn btn-danger" onclick="resetAll()">🔄 New Case</button>
-      </div>
+      <div></div>
+      <button class="btn btn-primary" onclick="goToStep(2)">Next: Upload Documents →</button>
     </div>
   </div>
 
-  <!-- HISTORY PANEL -->
-  <div class="step-panel" id="historyPanel">
-    <h1><span>AIMS</span> VISION PRO</h1>
-    <p class="subtitle">Report History — Searchable Archive</p>
+  <!-- STEP 2: Document Upload + OCR -->
+  <div class="panel" id="panel2">
+    <h2>📄 Smart Document Intake</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div class="card">
+          <h3>📋 Prescription / Referral</h3>
+          <div class="upload-zone" onclick="document.getElementById('prescriptionFile').click()" id="rxDrop">
+            <div class="icon">📋</div>
+            <p>Click to upload prescription</p>
+            <small>JPG, PNG, PDF, DICOM</small>
+          </div>
+          <input type="file" id="prescriptionFile" accept="image/*,.pdf,.dcm" class="hidden" onchange="handlePrescriptionUpload(this)">
+          <div class="file-list" id="rxFiles"></div>
+          <button class="btn btn-outline" onclick="analyzePrescription()" id="rxBtn" disabled style="margin-top:8px;width:100%;">🔍 Analyze Prescription</button>
+        </div>
+        <div class="card" id="rxResult" style="display:none;">
+          <h3>✅ Extracted from Prescription</h3>
+          <div id="rxContent"></div>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>📎 Supporting Documents</h3>
+          <div class="upload-zone" onclick="document.getElementById('supportingFiles').click()">
+            <div class="icon">📎</div>
+            <p>Upload photos, videos, prior reports</p>
+            <small>JPG, PNG, PDF, MP4, DICOM</small>
+          </div>
+          <input type="file" id="supportingFiles" accept="image/*,video/*,.pdf,.dcm" multiple class="hidden" onchange="handleSupportingUpload(this)">
+          <div class="file-list" id="supportingFilesList"></div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(1)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(3)">Next: Images & Analysis →</button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Images & AI Analysis -->
+  <div class="panel" id="panel3">
+    <h2>🔬 Medical Imaging & AI Analysis</h2>
     <div class="card">
-      <div class="search-bar">
-        <input placeholder="Search reports..." id="histSearch" onkeyup="searchHistory()">
-        <button class="btn btn-secondary" onclick="loadHistory()">🔄 Refresh</button>
+      <div class="upload-zone" onclick="document.getElementById('imageFiles').click()" id="imgDrop">
+        <div class="icon">🩻</div>
+        <p>Upload MRI / X-ray / CT images</p>
+        <small>JPG, PNG, DICOM — multiple files supported</small>
       </div>
-      <div id="historyStats" style="font-size:11px;color:var(--sub);margin-bottom:12px"></div>
-      <table class="history-table">
-        <thead><tr><th>ID</th><th>Patient</th><th>Exam</th><th>Preview</th><th>Date</th></tr></thead>
-        <tbody id="historyBody"><tr><td colspan="5" style="text-align:center;color:var(--sub)">Loading...</td></tr></tbody>
-      </table>
+      <input type="file" id="imageFiles" accept="image/*,.dcm" multiple class="hidden" onchange="handleImageUpload(this)">
+      <div class="file-list" id="imgFiles"></div>
+    </div>
+    <div id="imagePreview" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;"></div>
+    <button class="btn btn-primary" onclick="runAIAnalysis()" id="analyzeBtn" disabled style="margin-top:12px;width:100%;">
+      🤖 Run AI Analysis
+    </button>
+    <div id="analysisResult" style="display:none;margin-top:12px;"></div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(2)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(4)" id="toReviewBtn" disabled>Next: Review & Compare →</button>
     </div>
   </div>
-</main>
 
-<div class="status-bar">
-  <span id="statusText">Ready — Start by uploading a prescription</span>
-  <span style="color:var(--sub)">Session: <span id="sessionIdDisplay">—</span></span>
+  <!-- STEP 4: Side-by-Side Review -->
+  <div class="panel" id="panel4">
+    <h2>🔍 Review & Compare — AI + Doctor</h2>
+    <div class="compare">
+      <div class="col ai">
+        <h3>🤖 AI Analysis</h3>
+        <div id="aiFindings">No analysis yet. Go back to Step 3.</div>
+      </div>
+      <div class="col doctor">
+        <h3>🎤 Doctor's Dictation & Input</h3>
+        <div class="dictation-bar" style="margin-bottom:10px;">
+          <button class="btn btn-primary" id="doctorDictateBtn" onclick="toggleDoctorDictation()">🎤 Dictate Findings</button>
+          <span id="doctorDictateStatus" style="color:#94a3b8;font-size:0.8em;"></span>
+          <button class="btn btn-outline" onclick="document.getElementById('doctorFindings').value=''" style="font-size:0.8em;">Clear</button>
+        </div>
+        <textarea id="doctorFindings" placeholder="Dictate or type your findings, corrections, and observations... Speech-to-text is active when you click 'Dictate Findings'"></textarea>
+        <button class="btn btn-primary" onclick="combineAnalysis()" id="combineBtn" style="margin-top:8px;width:100%;">
+          🔄 Combine AI + Doctor Analysis
+        </button>
+        <div id="combinedResult" style="display:none;margin-top:12px;"></div>
+        <div style="margin-top:12px;">
+          <label>Final Impression</label>
+          <textarea id="doctorImpression" placeholder="Auto-filled from combined analysis..." style="min-height:60px;"></textarea>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(3)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(5)">Next: Codes & Red Flags →</button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Codes & Red Flags -->
+  <div class="panel" id="panel5">
+    <h2>🏷️ Auto-Coding & Red Flags</h2>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div>
+        <div class="card">
+          <h3>📋 ICD-10 Diagnosis Codes</h3>
+          <div id="icd10List"><p style="color:#64748b;">Run AI analysis first (Step 3)</p></div>
+          <button class="btn btn-outline" onclick="addCodeRow('icd10')" style="margin-top:8px;">+ Add ICD-10</button>
+        </div>
+        <div class="card">
+          <h3>💳 CPT Procedure Codes</h3>
+          <div id="cptList"><p style="color:#64748b;">Run AI analysis first (Step 3)</p></div>
+          <button class="btn btn-outline" onclick="addCodeRow('cpt')" style="margin-top:8px;">+ Add CPT</button>
+        </div>
+      </div>
+      <div>
+        <div class="card">
+          <h3>🚩 Clinical Red Flags</h3>
+          <div id="redFlagsList"><p style="color:#64748b;">Generating from AI analysis...</p></div>
+        </div>
+        <div class="card">
+          <h3>📊 RAG Matches</h3>
+          <div id="ragMatches"><p style="color:#64748b;">Similar cases from findings library</p></div>
+        </div>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(4)">← Back</button>
+      <button class="btn btn-primary" onclick="goToStep(6)">Next: Finalize →</button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Finalize & Save -->
+  <div class="panel" id="panel6">
+    <h2>✅ Finalize Report</h2>
+    <div class="card">
+      <h3>🎤 Dictate Notes</h3>
+      <div class="dictation-bar">
+        <button class="btn btn-primary" id="dictateBtn" onclick="toggleDictation()">🎤 Start Dictation</button>
+        <span id="dictateStatus" style="color:#94a3b8;"></span>
+      </div>
+      <textarea id="dictationNotes" placeholder="Dictated notes will appear here... or type directly" style="margin-top:8px;"></textarea>
+    </div>
+    <div class="card">
+      <h3>📄 Report Preview</h3>
+      <div class="preview-box" id="reportPreview">Complete all steps to generate preview...</div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-outline" onclick="goToStep(5)">← Back</button>
+      <div>
+        <button class="btn btn-outline" onclick="downloadReport()">📥 Download PDF</button>
+        <button class="btn btn-success" onclick="saveReport()">💾 Save to Database</button>
+      </div>
+    </div>
+  </div>
+
 </div>
-<div class="toast" id="toast"></div>
 
 <script>
 // ═══════════ STATE ═══════════
-let sessionId = null;
-let prescriptionData = null;
-let imageFindings = null;
-let ragSources = null;
-let correlationData = null;
-let isRecording = false;
-let recognition = null;
-let selectedPrescriptionFile = null;
-let selectedImageFiles = [];
+const state = {
+  patient: {}, visit: {}, rx: null, rxResult: null,
+  supportingFiles: [], images: [], imagePreviews: [],
+  aiAnalysis: null, findingsMatches: [], icd10Codes: [], cptCodes: [],
+  redFlags: [], sessionId: null, currentStep: 1,
+  recognition: null, isDictating: false
+};
+
+let uploadedPrescriptionFile = null;
+let uploadedImageFiles = [];
 
 // ═══════════ NAVIGATION ═══════════
 function goToStep(n) {
-  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById(`step${n}`).classList.add('active');
-  document.querySelectorAll('.progress .step').forEach(s => {
-    const sn = parseInt(s.dataset.step);
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel' + n).classList.add('active');
+  document.querySelectorAll('.step').forEach((s, i) => {
     s.classList.remove('active', 'done');
-    if (sn === n) s.classList.add('active');
-    if (sn < n) s.classList.add('done');
+    if (i + 1 === n) s.classList.add('active');
+    else if (i + 1 < n) s.classList.add('done');
   });
+  state.currentStep = n;
+  
+  if (n === 4) populateReview();
+  if (n === 5) populateCodesAndFlags();
+  if (n === 6) generatePreview();
 }
 
-function setStatus(msg) { document.getElementById('statusText').textContent = msg; }
-function toast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),3000); }
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('[id^="tab-"]').forEach(d => d.style.display = 'none');
-  event.target.classList.add('active');
-  document.getElementById(`tab-${name}`).style.display = 'block';
-  if (name === 'camera') startCamera();
-  else stopCamera();
+function toggleMVA() {
+  const vt = document.getElementById('visitType').value;
+  document.getElementById('mvaFields').classList.toggle('hidden', vt !== 'mva');
 }
 
-// ═══════════ CAMERA ═══════════
-let cameraStream = null;
-async function startCamera() {
-  try {
-    cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-    document.getElementById('cameraVideo').srcObject = cameraStream;
-  } catch(e) { toast('Camera access denied'); }
-}
-function stopCamera() {
-  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
-}
-function capturePhoto() {
-  const video = document.getElementById('cameraVideo');
-  const canvas = document.getElementById('cameraCanvas');
-  canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  canvas.toBlob(blob => {
-    selectedPrescriptionFile = new File([blob], 'prescription_capture.jpg', { type: 'image/jpeg' });
-    document.getElementById('prescriptionFileList').innerHTML = `<div class="file-item"><span class="name">📸 Captured prescription</span><span class="size">${(blob.size/1024).toFixed(0)}KB</span></div>`;
-    document.getElementById('analyzeRxBtn').disabled = false;
-    toast('Photo captured!');
-    stopCamera();
-  }, 'image/jpeg', 0.9);
+// ═══════════ STEP 1: Collect patient ═══════════
+function collectPatient() {
+  state.patient = {
+    firstName: document.getElementById('firstName').value,
+    lastName: document.getElementById('lastName').value,
+    dob: document.getElementById('dob').value,
+    gender: document.getElementById('gender').value,
+    mrn: document.getElementById('mrn').value,
+    phone: document.getElementById('phone').value
+  };
+  state.visit = {
+    type: document.getElementById('visitType').value,
+    accidentDate: document.getElementById('accidentDate').value,
+    referringPhysician: document.getElementById('referringPhysician').value,
+    facility: document.getElementById('facility').value
+  };
 }
 
-// ═══════════ STEP 1: PRESCRIPTION ═══════════
-function handlePrescriptionFile(file) {
-  if (!file) return;
-  selectedPrescriptionFile = file;
-  document.getElementById('prescriptionFileList').innerHTML = `<div class="file-item"><span class="name">📄 ${file.name}</span><span class="size">${(file.size/1024).toFixed(0)}KB</span></div>`;
-  document.getElementById('analyzeRxBtn').disabled = false;
+// ═══════════ STEP 2: Documents ═══════════
+function handlePrescriptionUpload(input) {
+  if (!input.files[0]) return;
+  uploadedPrescriptionFile = input.files[0];
+  document.getElementById('rxFiles').innerHTML = `<div class="tag">📋 ${input.files[0].name} <span class="remove" onclick="clearRx()">✕</span></div>`;
+  document.getElementById('rxBtn').disabled = false;
+}
+
+function handleSupportingUpload(input) {
+  state.supportingFiles = Array.from(input.files);
+  document.getElementById('supportingFilesList').innerHTML = state.supportingFiles.map((f, i) =>
+    `<div class="tag">${f.type.startsWith('video') ? '🎬' : f.type.startsWith('image') ? '🖼️' : '📎'} ${f.name} <span class="remove" onclick="removeSupporting(${i})">✕</span></div>`
+  ).join('');
+}
+
+function clearRx() {
+  uploadedPrescriptionFile = null;
+  document.getElementById('rxFiles').innerHTML = '';
+  document.getElementById('rxBtn').disabled = true;
+  document.getElementById('rxResult').style.display = 'none';
+}
+
+function removeSupporting(i) {
+  state.supportingFiles.splice(i, 1);
+  document.getElementById('supportingFilesList').children[i]?.remove();
 }
 
 async function analyzePrescription() {
-  if (!selectedPrescriptionFile) { toast('Select a prescription file first'); return; }
-
-  document.getElementById('step1Loading').classList.add('show');
-  document.getElementById('analyzeRxBtn').disabled = true;
-  setStatus('Analyzing prescription...');
-
-  const form = new FormData();
-  form.append('prescription', selectedPrescriptionFile);
-  if (sessionId) form.append('session_id', sessionId);
-
+  if (!uploadedPrescriptionFile) return;
+  const btn = document.getElementById('rxBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+  
+  const fd = new FormData();
+  fd.append('prescription', uploadedPrescriptionFile);
+  collectPatient();
+  fd.append('patient_info', JSON.stringify(state.patient));
+  
   try {
-    const resp = await fetch('/api/prescription/analyze', { method:'POST', body:form });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error);
-
-    sessionId = data.session_id;
-    prescriptionData = data.prescription;
-    document.getElementById('sessionIdDisplay').textContent = sessionId;
-
-    // Fill Step 2 form
-    document.getElementById('rxExamType').value = data.prescription.exam_type?.toLowerCase().includes('x-ray') ? 'X-ray' : data.prescription.exam_type?.toLowerCase().includes('ct') ? 'CT' : data.prescription.exam_type?.toLowerCase().includes('ultrasound') ? 'Ultrasound' : 'MRI';
-    document.getElementById('rxBodyRegion').value = data.prescription.body_region || '';
-    document.getElementById('rxIndication').value = data.prescription.clinical_indication || '';
-    document.getElementById('rxDiagnosis').value = data.prescription.preliminary_diagnosis || '';
-    document.getElementById('rxUrgency').value = data.prescription.urgency || 'routine';
-    document.getElementById('rxContrast').value = data.prescription.contrast || 'not specified';
-    document.getElementById('rxInstructions').value = data.prescription.special_instructions || '';
-    document.getElementById('rxPhysician').value = data.prescription.referring_physician || '';
-    document.getElementById('rxFacility').value = data.prescription.facility || '';
-
-    goToStep(2);
-    setStatus('Prescription analyzed — review the extracted data');
-    toast('Prescription analyzed!');
-  } catch(e) {
-    setStatus('Error: ' + e.message);
-    toast('Failed: ' + e.message);
-  } finally {
-    document.getElementById('step1Loading').classList.remove('show');
-    document.getElementById('analyzeRxBtn').disabled = false;
+    const res = await fetch('/api/prescription/analyze', { method: 'POST', body: fd });
+    const data = await res.json();
+    state.rx = data.prescription;
+    state.sessionId = data.session_id;
+    
+    document.getElementById('rxResult').style.display = 'block';
+    document.getElementById('rxContent').innerHTML = `
+      <p><strong>Exam:</strong> ${data.prescription.exam_type || 'Unknown'}</p>
+      <p><strong>Body Region:</strong> ${data.prescription.body_region || 'Unknown'}</p>
+      <p><strong>Indication:</strong> ${data.prescription.clinical_indication || 'None'}</p>
+      <p><strong>Diagnosis:</strong> ${data.prescription.preliminary_diagnosis || 'None'}</p>
+      <p><strong>Urgency:</strong> ${data.prescription.urgency || 'routine'}</p>
+    `;
+    document.getElementById('statusBadge').textContent = 'RX Analyzed ✓';
+  } catch (e) {
+    alert('Prescription analysis failed: ' + e.message);
   }
+  btn.disabled = false; btn.innerHTML = '🔍 Analyze Prescription';
 }
 
-// ═══════════ STEP 2: CONFIRM ═══════════
-function confirmPrescription() {
-  prescriptionData = {
-    exam_type: document.getElementById('rxExamType').value,
-    body_region: document.getElementById('rxBodyRegion').value,
-    clinical_indication: document.getElementById('rxIndication').value,
-    preliminary_diagnosis: document.getElementById('rxDiagnosis').value,
-    urgency: document.getElementById('rxUrgency').value,
-    contrast: document.getElementById('rxContrast').value,
-    special_instructions: document.getElementById('rxInstructions').value,
-    referring_physician: document.getElementById('rxPhysician').value,
-    facility: document.getElementById('rxFacility').value,
-  };
-  document.getElementById('rxContext').textContent = `${prescriptionData.exam_type} | ${prescriptionData.body_region} | ${prescriptionData.preliminary_diagnosis || 'no Dx'}`;
-  document.getElementById('step3Subtitle').textContent = `Step 3 — Upload ${prescriptionData.exam_type} images for ${prescriptionData.body_region}`;
-  goToStep(3);
-  setStatus('Prescription confirmed — upload images');
-}
-
-// ═══════════ STEP 3: IMAGES ═══════════
-function handleImageFiles(files) {
-  selectedImageFiles = Array.from(files);
-  document.getElementById('imageFileList').innerHTML = selectedImageFiles.map((f,i) => 
-    `<div class="file-item"><span class="name">🩻 ${f.name}</span><span class="size">${(f.size/1024/1024).toFixed(1)}MB</span><span class="remove" onclick="removeImage(${i})">✕</span></div>`
+// ═══════════ STEP 3: Images ═══════════
+function handleImageUpload(input) {
+  uploadedImageFiles = Array.from(input.files);
+  document.getElementById('imgFiles').innerHTML = uploadedImageFiles.map(f =>
+    `<div class="tag">🩻 ${f.name} (${(f.size/1024/1024).toFixed(1)}MB)</div>`
   ).join('');
-  document.getElementById('analyzeImagesBtn').disabled = selectedImageFiles.length === 0;
+  document.getElementById('analyzeBtn').disabled = uploadedImageFiles.length === 0;
+  
+  // Preview
+  const preview = document.getElementById('imagePreview');
+  preview.innerHTML = '';
+  uploadedImageFiles.forEach((f, i) => {
+    if (f.type.startsWith('image/')) {
+      const url = URL.createObjectURL(f);
+      preview.innerHTML += `<img src="${url}" class="img-preview" style="max-width:200px;max-height:200px;" onclick="window.open('${url}')">`;
+    } else if (f.type.startsWith('video/')) {
+      const url = URL.createObjectURL(f);
+      preview.innerHTML += `<video src="${url}" class="video-preview" style="max-width:200px;max-height:200px;" controls></video>`;
+    }
+  });
 }
-function removeImage(i) { selectedImageFiles.splice(i,1); handleImageFiles(selectedImageFiles); }
 
-async function analyzeImages() {
-  if (!selectedImageFiles.length) { toast('Select images first'); return; }
-  if (!sessionId) { toast('No session — go back to Step 1'); return; }
-
-  document.getElementById('step3Loading').classList.add('show');
-  document.getElementById('analyzeImagesBtn').disabled = true;
-  setStatus(`Analyzing ${selectedImageFiles.length} image(s)...`);
-
-  const form = new FormData();
-  form.append('session_id', sessionId);
-  selectedImageFiles.forEach(f => form.append('images', f));
-
+async function runAIAnalysis() {
+  if (!uploadedImageFiles.length) return;
+  const btn = document.getElementById('analyzeBtn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> AI analyzing images...';
+  
+  collectPatient();
+  const fd = new FormData();
+  uploadedImageFiles.forEach(f => fd.append('images', f));
+  if (state.sessionId) fd.append('session_id', state.sessionId);
+  fd.append('patient_name', `${state.patient.firstName} ${state.patient.lastName}`);
+  fd.append('visit_type', state.visit.type);
+  
   try {
-    const resp = await fetch('/api/images/analyze', { method:'POST', body:form });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error);
-
-    imageFindings = data.findings;
-    ragSources = data.rag;
-
-    // Display findings
-    document.getElementById('findingsDisplay').innerHTML = data.findings.map(f => 
-      `<div class="finding-item"><div class="idx">Image ${f.index} — ${f.file_name}</div><div class="content">${f.analysis}</div></div>`
-    ).join('');
-
-    // Display RAG
-    document.getElementById('ragDisplay').innerHTML = data.rag.map(r => 
-      `<div class="result-box"><div class="label">${r.category} (${r.score?.toFixed(2)})</div><div class="value">${r.title}</div></div>`
-    ).join('');
-
-    goToStep(4);
-    setStatus(`${data.image_count} images analyzed — run correlation next`);
-    toast('Images analyzed!');
-  } catch(e) {
-    setStatus('Error: ' + e.message);
-    toast('Failed: ' + e.message);
-  } finally {
-    document.getElementById('step3Loading').classList.remove('show');
-    document.getElementById('analyzeImagesBtn').disabled = false;
+    // First create session if needed
+    if (!state.sessionId) {
+      const sRes = await fetch('/api/session/new', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({patient:state.patient, visit:state.visit}) });
+      const sData = await sRes.json();
+      state.sessionId = sData.session_id;
+      fd.set('session_id', state.sessionId);
+    }
+    
+    const res = await fetch('/api/images/analyze', { method: 'POST', body: fd });
+    const data = await res.json();
+    state.aiAnalysis = data.findings;
+    state.findingsMatches = data.findings_matches || [];
+    if (data.findings_matches) {
+      state.icd10Codes = data.findings_matches.flatMap(f => (f.icd10_codes || []).map(c => ({code:c, desc:''})));
+      state.cptCodes = data.findings_matches.flatMap(f => (f.cpt_codes || []).map(c => ({code:c, desc:''})));
+      state.icd10Codes = [...new Map(state.icd10Codes.map(c => [c.code, c])).values()];
+      state.cptCodes = [...new Map(state.cptCodes.map(c => [c.code, c])).values()];
+    }
+    
+    document.getElementById('analysisResult').style.display = 'block';
+    document.getElementById('analysisResult').innerHTML = `
+      <div class="card"><h3>✅ Analysis Complete</h3>
+        <p>${data.image_count} images analyzed</p>
+        <p>RAG matches: ${state.findingsMatches.length} similar findings found</p>
+      </div>
+    `;
+    document.getElementById('toReviewBtn').disabled = false;
+    document.getElementById('statusBadge').textContent = 'Analysis Done ✓';
+  } catch (e) {
+    alert('AI analysis failed: ' + e.message);
   }
+  btn.disabled = false; btn.innerHTML = '🤖 Run AI Analysis';
 }
 
-// ═══════════ STEP 4: CORRELATION ═══════════
-async function runCorrelation() {
-  if (!sessionId) return;
-  document.getElementById('correlateBtn').disabled = true;
-  document.getElementById('correlateBtn').textContent = '⏳ Correlating...';
-  setStatus('Running correlation analysis...');
+// ═══════════ STEP 4: Review ═══════════
+let doctorRecognition = null;
+let isDoctorDictating = false;
 
-  try {
-    const resp = await fetch('/api/correlate', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ session_id: sessionId })
-    });
-    const data = await resp.json();
-    correlationData = data.correlation;
-    document.getElementById('correlationDisplay').textContent = data.correlation;
-    document.getElementById('correlationCard').style.display = 'block';
-    setStatus('Correlation complete');
-    toast('Correlation done!');
-  } catch(e) {
-    toast('Correlation failed: ' + e.message);
-  } finally {
-    document.getElementById('correlateBtn').disabled = false;
-    document.getElementById('correlateBtn').textContent = '🔗 Run Correlation';
+function populateReview() {
+  if (!state.aiAnalysis) {
+    document.getElementById('aiFindings').innerHTML = '<p style="color:#ef4444;">No analysis data. Go back to Step 3 and run AI analysis.</p>';
+    return;
   }
+  document.getElementById('aiFindings').innerHTML = state.aiAnalysis.map((f, i) =>
+    `<div class="card" style="margin-bottom:8px;">
+      <strong>Image ${f.index}: ${f.file_name}</strong>
+      <p style="white-space:pre-wrap;font-size:0.85em;margin-top:4px;">${f.analysis}</p>
+    </div>`
+  ).join('');
 }
 
-// ═══════════ STEP 5: NOTE ═══════════
-async function generateNote() {
-  if (!sessionId) { toast('No active session'); return; }
+function toggleDoctorDictation() {
+  if (isDoctorDictating) { stopDoctorDictation(); return; }
+  
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert('Speech recognition not supported in this browser. Use Chrome or Edge.'); return; }
+  
+  doctorRecognition = new SpeechRecognition();
+  doctorRecognition.continuous = true;
+  doctorRecognition.interimResults = true;
+  doctorRecognition.lang = 'en-US';
+  
+  let finalTranscript = '';
+  
+  doctorRecognition.onresult = (event) => {
+    let interim = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      if (event.results[i].isFinal) {
+        finalTranscript += event.results[i][0].transcript + ' ';
+      } else {
+        interim += event.results[i][0].transcript;
+      }
+    }
+    // Append to existing text (don't overwrite)
+    const existingText = document.getElementById('doctorFindings').value;
+    const cleanExisting = existingText.replace(finalTranscript, '');
+    document.getElementById('doctorFindings').value = cleanExisting + finalTranscript + interim;
+  };
+  
+  doctorRecognition.onerror = (e) => { 
+    console.error('Dictation error:', e.error); 
+    stopDoctorDictation();
+  };
+  
+  doctorRecognition.start();
+  isDoctorDictating = true;
+  document.getElementById('doctorDictateBtn').textContent = '⏹️ Stop Dictating';
+  document.getElementById('doctorDictateBtn').style.background = '#ef4444';
+  document.getElementById('doctorDictateStatus').innerHTML = '<span class="recording">🔴 Recording... speak clearly</span>';
+}
 
-  document.getElementById('step5Loading').classList.add('show');
-  document.getElementById('generateNoteBtn').disabled = true;
-  setStatus('Generating medical note...');
+function stopDoctorDictation() {
+  if (doctorRecognition) { doctorRecognition.stop(); doctorRecognition = null; }
+  isDoctorDictating = false;
+  document.getElementById('doctorDictateBtn').textContent = '🎤 Dictate Findings';
+  document.getElementById('doctorDictateBtn').style.background = '#3b82f6';
+  document.getElementById('doctorDictateStatus').textContent = '✅ Dictation saved to text area';
+  setTimeout(() => { document.getElementById('doctorDictateStatus').textContent = ''; }, 3000);
+}
 
+async function combineAnalysis() {
+  const aiText = (state.aiAnalysis || []).map(f => f.analysis).join('\n\n');
+  const doctorText = document.getElementById('doctorFindings').value;
+  
+  if (!aiText) { alert('No AI analysis available. Run Step 3 first.'); return; }
+  if (!doctorText.trim()) { alert('Please dictate or type your findings first.'); return; }
+  
+  const btn = document.getElementById('combineBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Combining AI + Doctor analysis...';
+  
   try {
-    const resp = await fetch('/api/generate-note', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+    const res = await fetch('/api/correlate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
       body: JSON.stringify({
-        session_id: sessionId,
-        doctor_notes: document.getElementById('doctorNotes').value,
-        prompt_template: document.getElementById('noteTemplate').value,
+        session_id: state.sessionId,
+        findings: aiText,
+        doctor_notes: doctorText,
+        patient_info: `${state.patient.firstName} ${state.patient.lastName}`,
+        visit_type: state.visit.type,
+        mode: 'combine'
       })
     });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error);
-
-    document.getElementById('reportContent').innerHTML = data.note.replace(/\n/g, '<br>');
-    document.getElementById('reportCard').style.display = 'block';
-    setStatus('Medical note generated');
-    toast('Report ready!');
-  } catch(e) {
-    toast('Failed: ' + e.message);
-  } finally {
-    document.getElementById('step5Loading').classList.remove('show');
-    document.getElementById('generateNoteBtn').disabled = false;
+    
+    const data = await res.json();
+    
+    if (data.correlation) {
+      // Show combined result
+      document.getElementById('combinedResult').style.display = 'block';
+      document.getElementById('combinedResult').innerHTML = `
+        <div class="card" style="border-color:#4ade80;">
+          <h3 style="color:#4ade80;">✅ Combined Analysis (AI + Doctor)</h3>
+          <p style="white-space:pre-wrap;font-size:0.9em;">${data.correlation}</p>
+        </div>
+      `;
+      
+      // Auto-extract impression from combined text
+      const impressionMatch = data.correlation.match(/IMPRESSION:?\s*([\s\S]*?)(?=\n\n[A-Z]|\n[A-Z]{2,}|$)/i);
+      if (impressionMatch) {
+        document.getElementById('doctorImpression').value = impressionMatch[1].trim();
+      } else {
+        // Take last 2-3 lines as impression
+        const lines = data.correlation.split('\n').filter(l => l.trim());
+        document.getElementById('doctorImpression').value = lines.slice(-3).join('\n');
+      }
+      
+      // Also populate red flags if returned
+      if (data.red_flags && data.red_flags.length) {
+        state.redFlags = data.red_flags;
+      }
+    }
+  } catch (e) {
+    alert('Combined analysis failed: ' + e.message);
   }
+  
+  btn.disabled = false;
+  btn.innerHTML = '🔄 Combine AI + Doctor Analysis';
 }
 
-// ═══════════ DEMO RUNNER ═══════════
-async function runDemo(caseId) {
-  document.getElementById('demoCases').style.display = 'none';
-  const loading = document.getElementById('demoLoading');
-  const status = document.getElementById('demoStatus');
-  const result = document.getElementById('demoResult');
-  loading.classList.add('show');
-  status.textContent = 'Running full demo pipeline...';
+// ═══════════ STEP 5: Codes & Flags ═══════════
+function populateCodesAndFlags() {
+  // ICD-10
+  const icdDiv = document.getElementById('icd10List');
+  if (state.icd10Codes.length) {
+    icdDiv.innerHTML = state.icd10Codes.map((c, i) =>
+      `<div class="match-card"><span>🏷️</span>
+        <input value="${c.code}" style="width:100px;padding:4px;background:#0f172a;border:1px solid #334155;border-radius:4px;color:#e2e8f0;font-family:monospace;" onchange="state.icd10Codes[${i}].code=this.value">
+        <input value="${c.desc}" placeholder="Description" style="flex:1;padding:4px;background:#0f172a;border:1px solid #334155;border-radius:4px;color:#e2e8f0;" onchange="state.icd10Codes[${i}].desc=this.value">
+        <span class="remove" onclick="this.parentElement.remove();state.icd10Codes.splice(${i},1)" style="cursor:pointer;color:#ef4444;">✕</span>
+      </div>`
+    ).join('');
+  } else {
+    icdDiv.innerHTML = '<p style="color:#64748b;">No codes extracted. Run AI analysis or add manually.</p>';
+  }
+  
+  // CPT
+  const cptDiv = document.getElementById('cptList');
+  if (state.cptCodes.length) {
+    cptDiv.innerHTML = state.cptCodes.map((c, i) =>
+      `<div class="match-card"><span>💳</span>
+        <input value="${c.code}" style="width:100px;padding:4px;background:#0f172a;border:1px solid #334155;border-radius:4px;color:#e2e8f0;font-family:monospace;" onchange="state.cptCodes[${i}].code=this.value">
+        <input value="${c.desc}" placeholder="Description" style="flex:1;padding:4px;background:#0f172a;border:1px solid #334155;border-radius:4px;color:#e2e8f0;" onchange="state.cptCodes[${i}].desc=this.value">
+        <span class="remove" onclick="this.parentElement.remove();state.cptCodes.splice(${i},1)" style="cursor:pointer;color:#ef4444;">✕</span>
+      </div>`
+    ).join('');
+  } else {
+    cptDiv.innerHTML = '<p style="color:#64748b;">No codes extracted. Add manually.</p>';
+  }
+  
+  // RAG Matches
+  const ragDiv = document.getElementById('ragMatches');
+  if (state.findingsMatches.length) {
+    ragDiv.innerHTML = state.findingsMatches.map(f =>
+      `<div class="match-card">
+        <span class="score">${(f.score*100).toFixed(0)}%</span>
+        <div>
+          <strong>${f.condition_name}</strong>
+          <span style="color:#94a3b8;font-size:0.8em;">(${f.severity || 'unknown'})</span>
+          <div class="codes">
+            ${(f.icd10_codes||[]).map(c => `<span class="code-tag">${c}</span>`).join('')}
+            ${(f.cpt_codes||[]).map(c => `<span class="code-tag">${c}</span>`).join('')}
+          </div>
+        </div>
+      </div>`
+    ).join('');
+  }
+  
+  // Red Flags
+  generateRedFlags();
+}
 
+function addCodeRow(type) {
+  const list = type === 'icd10' ? state.icd10Codes : state.cptCodes;
+  list.push({code: '', desc: ''});
+  populateCodesAndFlags();
+}
+
+async function generateRedFlags() {
+  const flagsDiv = document.getElementById('redFlagsList');
+  flagsDiv.innerHTML = '<span class="spinner"></span> Generating red flags...';
+  
   try {
-    const resp = await fetch('/api/demo/run', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ case_id: caseId })
+    const findingsText = (state.aiAnalysis || []).map(f => f.analysis).join(' ');
+    const doctorText = document.getElementById('doctorFindings').value;
+    const patientInfo = `${state.patient.firstName} ${state.patient.lastName}, DOB: ${state.patient.dob}, Visit: ${state.visit.type}`;
+    
+    const res = await fetch('/api/correlate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        session_id: state.sessionId,
+        findings: findingsText,
+        doctor_notes: doctorText,
+        patient_info: patientInfo,
+        visit_type: state.visit.type
+      })
     });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error);
-
-    sessionId = data.session_id;
-    document.getElementById('sessionIdDisplay').textContent = sessionId;
-
-    result.style.display = 'block';
-    result.innerHTML = `
-      <div class="result-box">
-        <div class="label">✅ Primary Report (Agent 1: Chief Radiologist — gemma4)</div>
-        <div class="report" style="max-height:400px;overflow-y:auto;margin-top:8px">${data.primary_report.replace(/\n/g, '<br>')}</div>
-      </div>
-      <div class="result-box">
-        <div class="label">📚 RAG Sources (${data.rag_sources?.length || 0} ACR criteria)</div>
-        ${(data.rag_sources||[]).map(r => `<div style="font-size:11px;padding:2px 0">• [${r.category}] ${r.title} (${r.score?.toFixed(2)})</div>`).join('')}
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-blue" onclick="verifyDemo()">🔍 Run 3-Agent Verification</button>
-        <button class="btn btn-secondary" onclick="resetDemo()">Reset</button>
-      </div>
-    `;
-    status.textContent = 'Primary report ready. Run 3-agent verification.';
-    setStatus('Demo loaded — ' + data.steps.findings);
-  } catch(e) {
-    status.textContent = 'Failed: ' + e.message;
-    setStatus('Demo error');
-  } finally {
-    loading.classList.remove('show');
-    document.getElementById('demoCases').style.display = 'flex';
-  }
-}
-
-async function verifyDemo() {
-  if (!sessionId) return;
-  document.getElementById('demoCases').style.display = 'none';
-  const loading = document.getElementById('demoLoading');
-  const status = document.getElementById('demoStatus');
-  loading.classList.add('show');
-  status.textContent = 'Running 3-agent verification...';
-
-  try {
-    const resp = await fetch('/api/demo/verify', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ session_id: sessionId })
-    });
-    const data = await resp.json();
-    if (!data.success) throw new Error(data.error);
-
-    const result = document.getElementById('demoResult');
-    result.innerHTML += `
-      <div class="result-box" style="border-left:3px solid var(--blue)">
-        <div class="label">🔍 AGENT 2 — Specialist (llama3.1:8b — ${data.agents.agent2.role})</div>
-        <div class="value">${data.agents.agent2.review.replace(/\n/g, '<br>')}</div>
-      </div>
-      <div class="result-box" style="border-left:3px solid var(--purple)">
-        <div class="label">🩺 AGENT 3 — Clinical Accuracy (qwen2.5-medical — ${data.agents.agent3.role})</div>
-        <div class="value">${data.agents.agent3.review.replace(/\n/g, '<br>')}</div>
-      </div>
-      <div class="result-box" style="border-left:3px solid var(--accent);background:rgba(74,222,128,.03)">
-        <div class="label">🏆 FINAL VERIFIED REPORT</div>
-        <div class="report" style="max-height:500px;overflow-y:auto;margin-top:8px">${data.final_report.replace(/\n/g, '<br>')}</div>
-      </div>
-      <div class="btn-row">
-        <button class="btn btn-blue" onclick="printReport()">🖨 Print Final Report</button>
-        <button class="btn btn-secondary" onclick="resetDemo()">New Demo</button>
-      </div>
-    `;
-    status.textContent = '3-agent verification complete!';
-    setStatus('Final report verified by 3 AI specialists');
-    toast('Verification complete!');
-  } catch(e) {
-    status.textContent = 'Verification failed: ' + e.message;
-  } finally {
-    loading.classList.remove('show');
-    document.getElementById('demoCases').style.display = 'flex';
-  }
-}
-
-function resetDemo() {
-  document.getElementById('demoResult').style.display = 'none';
-  document.getElementById('demoResult').innerHTML = '';
-  document.getElementById('demoCases').style.display = 'flex';
-  sessionId = null;
-  fetch('/api/session/new', {method:'POST'}).then(r=>r.json()).then(d=>{ sessionId=d.session_id; document.getElementById('sessionIdDisplay').textContent=sessionId; });
-}
-
-// Voice dictation functions
-function toggleMic() {
-  if (isRecording) { stopDictation(); return; }
-  if (!('webkitSpeechRecognition' in window)) { toast('Use Chrome for voice dictation'); return; }
-  const SR = window.webkitSpeechRecognition;
-  recognition = new SR();
-  recognition.continuous = true; recognition.interimResults = true; recognition.lang = 'en-US';
-  recognition.onresult = e => {
-    let final = '';
-    for (let i=e.resultIndex; i<e.results.length; i++) if (e.results[i].isFinal) final += e.results[i][0].transcript + ' ';
-    if (final) document.getElementById('doctorNotes').value += final;
-  };
-  recognition.onend = () => { if (isRecording) recognition.start(); };
-  recognition.start();
-  isRecording = true;
-  document.getElementById('micBtn').textContent = '⏹ Stop'; document.getElementById('micBtn').className = 'mic-btn on';
-}
-function stopDictation() {
-  isRecording = false; if (recognition) { recognition.stop(); recognition = null; }
-  document.getElementById('micBtn').textContent = '🎤 Start Dictation'; document.getElementById('micBtn').className = 'mic-btn off';
-}
-
-// ═══════════ PRINT ═══════════
-function printReport() { window.print(); }
-function resetAll() {
-  sessionId = null; prescriptionData = null; imageFindings = null; ragSources = null; correlationData = null;
-  selectedPrescriptionFile = null; selectedImageFiles = [];
-  document.getElementById('sessionIdDisplay').textContent = '—';
-  document.getElementById('reportCard').style.display = 'none';
-  document.getElementById('correlationCard').style.display = 'none';
-  document.getElementById('doctorNotes').value = '';
-  document.getElementById('loginCard').style.display = document.getElementById('loginCard').style.display;
-  goToStep(1); setStatus('Ready — Start by uploading a prescription'); toast('New case started');
-}
-
-// ═══════════ AIMS AUTH ═══════════
-async function aimsLogin() {
-  const user = document.getElementById('loginUser').value || 'doctor';
-  const pass = document.getElementById('loginPass').value || 'doctor123';
-  const status = document.getElementById('loginStatus');
-  status.textContent = 'Connecting to AIMS...';
-  status.style.color = 'var(--sub)';
-  try {
-    const resp = await fetch('/api/auth/login', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username:user,password:pass})});
-    const data = await resp.json();
-    if (data.success) {
-      sessionId = data.session_id;
-      document.getElementById('sessionIdDisplay').textContent = sessionId;
-      status.textContent = '✅ Logged in as '+data.user.name+' ('+data.user.role+')';
-      status.style.color = 'var(--accent)';
-      document.getElementById('loginCard').style.display = 'none';
-      setStatus('Authenticated: '+data.user.name);
-      toast('Logged in to AIMS');
-    } else if (data.offline) {
-      status.textContent = '⚠️ AIMS unreachable — working offline';
-      status.style.color = 'var(--orange)';
+    const data = await res.json();
+    state.redFlags = data.red_flags || [];
+    
+    if (state.redFlags.length) {
+      flagsDiv.innerHTML = state.redFlags.map(f =>
+        `<div class="flag ${f.severity || 'info'}">
+          <strong>${f.severity?.toUpperCase() || 'INFO'}:</strong> ${f.message || f.description}
+          ${f.recommendation ? `<br><small style="color:#94a3b8;">→ ${f.recommendation}</small>` : ''}
+        </div>`
+      ).join('');
     } else {
-      status.textContent = '❌ '+(data.error||'Login failed');
-      status.style.color = 'var(--danger)';
+      flagsDiv.innerHTML = '<p style="color:#4ade80;">✅ No critical red flags detected</p>';
     }
-  } catch(e) {
-    status.textContent = '⚠️ AIMS offline — local mode';
-    status.style.color = 'var(--orange)';
+  } catch (e) {
+    flagsDiv.innerHTML = '<p style="color:#94a3b8;">Red flag generation skipped</p>';
   }
 }
-function skipLogin() {
-  document.getElementById('loginCard').style.display = 'none';
-  setStatus('Offline mode');
+
+// ═══════════ STEP 6: Finalize ═══════════
+function generatePreview() {
+  const patient = state.patient;
+  const visit = state.visit;
+  const aiFindings = (state.aiAnalysis || []).map(f => f.analysis).join('\n\n');
+  const doctorFindings = document.getElementById('doctorFindings').value;
+  const impression = document.getElementById('doctorImpression').value;
+  const dictation = document.getElementById('dictationNotes').value;
+  const icd10 = state.icd10Codes.map(c => c.code).filter(Boolean).join(', ');
+  const cpt = state.cptCodes.map(c => c.code).filter(Boolean).join(', ');
+  
+  document.getElementById('reportPreview').innerHTML = `
+    <h3 style="color:#60a5fa;">RADIOLOGY REPORT</h3>
+    <p><strong>Patient:</strong> ${patient.firstName} ${patient.lastName} | DOB: ${patient.dob} | Gender: ${patient.gender}</p>
+    <p><strong>MRN:</strong> ${patient.mrn || 'N/A'} | <strong>Phone:</strong> ${patient.phone || 'N/A'}</p>
+    <p><strong>Visit Type:</strong> ${visit.type} ${visit.accidentDate ? '| Accident: ' + visit.accidentDate : ''}</p>
+    <p><strong>Referring:</strong> ${visit.referringPhysician || 'N/A'} | <strong>Facility:</strong> ${visit.facility || 'N/A'}</p>
+    ${state.rx ? `<p><strong>Exam:</strong> ${state.rx.exam_type} | <strong>Region:</strong> ${state.rx.body_region}</p>` : ''}
+    <hr style="border-color:#334155;margin:12px 0;">
+    <h4 style="color:#93c5fd;">AI Findings:</h4>
+    <p style="white-space:pre-wrap;">${aiFindings || 'No AI analysis'}</p>
+    ${doctorFindings ? `<h4 style="color:#4ade80;">Doctor's Findings:</h4><p style="white-space:pre-wrap;">${doctorFindings}</p>` : ''}
+    ${impression ? `<h4 style="color:#f59e0b;">Impression:</h4><p>${impression}</p>` : ''}
+    <hr style="border-color:#334155;margin:12px 0;">
+    <p><strong>ICD-10:</strong> ${icd10 || 'None'} | <strong>CPT:</strong> ${cpt || 'None'}</p>
+    ${dictation ? `<h4>Provider Notes:</h4><p style="white-space:pre-wrap;">${dictation}</p>` : ''}
+    <p style="color:#64748b;font-size:0.8em;margin-top:12px;">Generated by AIMS VISION PRO — ${new Date().toLocaleString()}</p>
+  `;
 }
 
-// ═══════════ HISTORY ═══════════
-function showHistory() {
-  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('active'));
-  document.getElementById('historyPanel').classList.add('active');
-  loadHistory();
-}
-async function loadHistory() {
-  const search = document.getElementById('histSearch')?.value || '';
+async function saveReport() {
+  collectPatient();
+  const reportText = document.getElementById('reportPreview').innerText;
+  
   try {
-    const [reportsRes, statsRes] = await Promise.all([
-      fetch(`/api/reports?search=${encodeURIComponent(search)}&limit=50`),
-      fetch('/api/reports/stats')
-    ]);
-    const reports = await reportsRes.json();
-    const stats = await statsRes.json();
-
-    document.getElementById('historyStats').textContent = 
-      `${stats.stats?.total || reports.total || 0} reports | Active since ${stats.stats?.first_report?.split('T')[0] || 'N/A'}`;
-
-    const tbody = document.getElementById('historyBody');
-    if (!reports.reports?.length) {
-      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--sub);padding:20px">No reports yet — generate your first report!</td></tr>';
-      return;
+    const res = await fetch('/api/generate-note', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        session_id: state.sessionId,
+        patient: state.patient,
+        visit: state.visit,
+        prescription: state.rx,
+        ai_findings: state.aiAnalysis,
+        doctor_findings: document.getElementById('doctorFindings').value,
+        impression: document.getElementById('doctorImpression').value,
+        icd10_codes: state.icd10Codes,
+        cpt_codes: state.cptCodes,
+        red_flags: state.redFlags,
+        dictation: document.getElementById('dictationNotes').value,
+        report_text: reportText
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      alert('✅ Report saved successfully!');
+      document.getElementById('statusBadge').textContent = 'Saved ✓';
+    } else {
+      alert('Save failed: ' + (data.error || 'Unknown error'));
     }
-    tbody.innerHTML = reports.reports.map(r => `
-      <tr>
-        <td class="id" onclick="viewReport(${r.id})">#${r.id}</td>
-        <td>${r.patient_id || '—'}</td>
-        <td>${(r.file_name || '—').slice(0,30)}</td>
-        <td>${r.preview || '—'}</td>
-        <td>${new Date(r.created_at).toLocaleDateString()}</td>
-      </tr>
-    `).join('');
-  } catch(e) { document.getElementById('historyBody').innerHTML = '<tr><td colspan="5" style="color:var(--danger)">Failed to load</td></tr>'; }
-}
-function searchHistory() { loadHistory(); }
-async function viewReport(id) {
-  try {
-    const resp = await fetch(`/api/reports/${id}`);
-    const data = await resp.json();
-    if (!data.report) return toast('Report not found');
-    document.getElementById('reportContent').innerHTML = (data.report.report_data || '').replace(/\n/g, '<br>');
-    document.getElementById('reportCard').style.display = 'block';
-    goToStep(5);
-    toast(`Loaded report #${id}`);
-  } catch(e) { toast('Failed to load report'); }
+  } catch (e) {
+    alert('Save failed: ' + e.message);
+  }
 }
 
-// Init
-fetch('/api/session/new', {method:'POST'}).then(r=>r.json()).then(d=>{ sessionId=d.session_id; document.getElementById('sessionIdDisplay').textContent=sessionId; });
+function downloadReport() {
+  generatePreview();
+  const text = document.getElementById('reportPreview').innerText;
+  const blob = new Blob([text], {type: 'text/plain'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `report_${state.patient.lastName || 'unknown'}_${new Date().toISOString().split('T')[0]}.txt`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ═══════════ DICTATION ═══════════
+function toggleDictation() {
+  if (state.isDictating) {
+    stopDictation();
+    return;
+  }
+  
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { alert('Speech recognition not supported in this browser'); return; }
+  
+  state.recognition = new SpeechRecognition();
+  state.recognition.continuous = true;
+  state.recognition.interimResults = true;
+  state.recognition.lang = 'en-US';
+  
+  state.recognition.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    document.getElementById('dictationNotes').value = transcript;
+    generatePreview();
+  };
+  
+  state.recognition.start();
+  state.isDictating = true;
+  document.getElementById('dictateBtn').textContent = '⏹️ Stop Dictation';
+  document.getElementById('dictateBtn').classList.add('recording');
+  document.getElementById('dictateStatus').textContent = '🔴 Recording...';
+}
+
+function stopDictation() {
+  if (state.recognition) state.recognition.stop();
+  state.isDictating = false;
+  document.getElementById('dictateBtn').textContent = '🎤 Start Dictation';
+  document.getElementById('dictateBtn').classList.remove('recording');
+  document.getElementById('dictateStatus').textContent = '';
+}
+
+// ═══════════ INIT ═══════════
+document.addEventListener('DOMContentLoaded', () => {
+  // Drag and drop for upload zones
+  ['rxDrop', 'imgDrop'].forEach(id => {
+    const zone = document.getElementById(id);
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.style.borderColor = '#3b82f6'; });
+    zone.addEventListener('dragleave', () => { zone.style.borderColor = '#475569'; });
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.style.borderColor = '#475569';
+      const input = id === 'rxDrop' ? document.getElementById('prescriptionFile') : document.getElementById('imageFiles');
+      const dt = e.dataTransfer;
+      if (dt.files.length) {
+        input.files = dt.files;
+        input.dispatchEvent(new Event('change'));
+      }
+    });
+  });
+  
+  // Keyboard shortcut: Ctrl+Enter to advance
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      e.preventDefault();
+      if (state.currentStep < 6) goToStep(state.currentStep + 1);
+    }
+  });
+});
 </script>
 </body>
 </html>

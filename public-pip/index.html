@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>PIP Radiology — Personal Injury Reports</title>
+<style>
+:root{--bg:#0a0a14;--card:#12122a;--border:#1e1e3a;--accent:#4ade80;--gold:#c9a84c;--text:#e0e0e0;--sub:#888;--warn:#fbbf24;--blue:#60a5fa}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:system-ui,sans-serif;min-height:100vh}
+header{background:var(--card);border-bottom:1px solid var(--border);padding:16px 32px;display:flex;justify-content:space-between;align-items:center}
+header h1{font-size:18px;color:var(--accent)}header h1 span{color:var(--sub);font-size:11px;display:block;font-weight:400}
+main{max-width:1000px;margin:24px auto;padding:0 24px;display:grid;gap:20px}
+.case-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(400px,1fr));gap:12px}
+.case-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;cursor:pointer;transition:all .2s}
+.case-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.case-card h3{font-size:15px;margin-bottom:6px}.case-card .accident{font-size:11px;color:var(--gold);margin-bottom:4px}
+.case-card .meta{font-size:10px;color:var(--sub)}
+.case-card .btn-row{display:flex;gap:8px;margin-top:12px}
+.report-panel{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;display:none}
+.report-panel.show{display:block}
+.report-content{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:20px;font-size:12px;line-height:1.7;white-space:pre-wrap;max-height:600px;overflow-y:auto}
+.loading{text-align:center;padding:40px;display:none}
+.loading.show{display:block}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.btn{padding:10px 20px;border-radius:8px;border:none;font-size:12px;font-weight:600;cursor:pointer}
+.btn-p{background:var(--accent);color:#000}.btn-g{background:var(--gold);color:#000}.btn-b{background:var(--blue);color:#000}.btn-sub{background:var(--border);color:var(--sub)}
+.btn:disabled{opacity:.4}
+.stats{display:flex;gap:8px;align-items:center;font-size:10px;color:var(--sub)}
+.images{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.image-thumb{width:80px;height:60px;border-radius:6px;border:1px solid var(--border);object-fit:cover;cursor:pointer}
+.image-thumb:hover{border-color:var(--accent)}
+.image-preview{display:none;position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:500;justify-content:center;align-items:center}
+.image-preview.show{display:flex}
+.image-preview img{max-width:90vw;max-height:90vh;border-radius:8px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏥 PIP Radiology<span>Personal Injury Protection — Chiropractic & Attorney Reports</span></h1>
+  <div class="stats" id="llmStatus">🟢 llama3.1:8b ready</div>
+</header>
+<main>
+  <div class="case-grid" id="caseGrid"></div>
+  <div class="loading" id="loading"><div class="spinner"></div><p>Generating PIP report...</p></div>
+  <div class="report-panel" id="reportPanel">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <h2 style="font-size:13px;color:var(--accent)">📋 PIP Radiology Report</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-g" id="downloadBtn" onclick="downloadReport()">⬇ Download</button>
+        <button class="btn btn-sub" onclick="document.getElementById('reportPanel').classList.remove('show')">✕</button>
+      </div>
+    </div>
+    <div class="report-content" id="reportContent"></div>
+  </div>
+</main>
+<div class="image-preview" id="imagePreview" onclick="this.classList.remove('show')"><img id="previewImg"></div>
+
+<script>
+let currentCase = null, currentReport = '';
+
+async function loadCases(){
+  const r=await fetch('/api/cases');const d=await r.json();
+  document.getElementById('caseGrid').innerHTML=d.cases.map(c=>`
+    <div class="case-card">
+      <h3>${PIP_CASE_NAMES[c.id]||c.patient}</h3>
+      <div class="accident">${PIP_CASE_ACCIDENTS[c.id]||c.accident}</div>
+      <div class="meta">${PIP_CASE_META[c.id]||''}</div>
+      <div class="images">${(PIP_CASE_IMAGES[c.id]||[]).map(img=>`<img src="${img}" class="image-thumb" onclick="event.stopPropagation();previewImage('${img}')" title="Click to enlarge">`).join('')}</div>
+      <div class="btn-row">
+        <button class="btn btn-p" onclick="generateReport('${c.id}')">📋 Generate PIP Report</button>
+        <button class="btn btn-g" onclick="quickDownload('${c.id}')">⬇ Quick Download</button>
+      </div>
+    </div>
+  `).join('');
+}
+const PIP_CASE_NAMES={whiplash:'Cervical Spine — Whiplash / Disc Herniation C4-C6',lumbar_herniation:'Lumbar Spine — Disc Extrusion L4-L5 / Radiculopathy'};
+const PIP_CASE_ACCIDENTS={whiplash:'Rear-end collision, 14 days post-accident',lumbar_herniation:'T-bone collision, passenger side, 21 days post-accident'};
+const PIP_CASE_META={whiplash:'Maria Gonzalez, 34F | Goldberg & Associates | Dr. James Chen, DC',lumbar_herniation:'Robert Taylor, 45M | Morgan & Morgan | Dr. Lisa Park, DC'};
+const PIP_CASE_IMAGES={whiplash:['/images/cervical_spine.jpg'],lumbar_herniation:['/images/lumbar_spine.jpg']};
+
+async function generateReport(caseId){
+  currentCase=caseId;
+  document.getElementById('loading').classList.add('show');
+  document.getElementById('reportPanel').classList.remove('show');
+  const r=await fetch('/api/report',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({case_id:caseId})});
+  const d=await r.json();
+  document.getElementById('loading').classList.remove('show');
+  if(d.success){
+    currentReport=d.report;
+    document.getElementById('reportContent').textContent=d.report;
+    document.getElementById('reportPanel').classList.add('show');
+    document.getElementById('reportPanel').querySelector('h2').textContent=`📋 PIP Report — ${d.patient} (${d.elapsed_seconds}s)`;
+  }
+}
+function quickDownload(caseId){window.open('/api/download/'+caseId,'_blank')}
+function downloadReport(){if(currentCase)window.open('/api/download/'+currentCase,'_blank')}
+function previewImage(src){document.getElementById('previewImg').src=src;document.getElementById('imagePreview').classList.add('show')}
+
+loadCases();
+</script>
+</body>
+</html>

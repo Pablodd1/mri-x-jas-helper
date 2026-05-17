@@ -1,0 +1,375 @@
+[
+  {
+    "finding_key": "c5_c6_disc_herniation_left",
+    "condition_name": "Left Paracentral Disc Herniation C5-C6",
+    "modality": "MRI",
+    "anatomical_region": "cervical_spine",
+    "finding_text": "Left paracentral disc protrusion at C5-C6 with mild thecal sac indentation. No cord compression or myelomalacia. Possible left C6 nerve root impingement. T2 hyperintense signal in nucleus pulposus consistent with disc degeneration.",
+    "severity": "mild",
+    "icd10_codes": [
+      "M50.22"
+    ],
+    "cpt_codes": [
+      "72141"
+    ],
+    "trauma_mechanisms": [
+      "mva_rear_impact",
+      "whiplash"
+    ]
+  },
+  {
+    "finding_key": "cervical_spine_whiplash_strain",
+    "condition_name": "Whiplash-Associated Disorder, Cervical Spine",
+    "modality": "MRI",
+    "anatomical_region": "cervical_spine",
+    "finding_text": "Straightening of normal cervical lordosis consistent with muscle spasm. No acute fracture or malalignment. Mild increased T2 signal in posterior paraspinal musculature at C3-C6 levels. Prevertebral soft tissues within normal limits.",
+    "severity": "mild",
+    "icd10_codes": [
+      "S13.4XXA"
+    ],
+    "cpt_codes": [
+      "72141",
+      "72040"
+    ],
+    "trauma_mechanisms": [
+      "mva_rear_impact",
+      "slip_fall_hyperextension"
+    ]
+  },
+  {
+    "finding_key": "c6_c7_facet_dislocation",
+    "condition_name": "Unilateral Facet Dislocation C6-C7",
+    "modality": "CT",
+    "anatomical_region": "cervical_spine",
+    "finding_text": "Unilateral jumped facet at C6-C7 on the left with approximately 25% anterolisthesis of C6 on C7. Widening of interspinous distance. No vertebral artery injury on CTA. Acute traumatic finding requiring surgical reduction.",
+    "severity": "severe",
+    "icd10_codes": [
+      "S13.150A"
+    ],
+    "cpt_codes": [
+      "22326",
+      "72126"
+    ],
+    "trauma_mechanisms": [
+      "mva_frontal_impact",
+      "mva_lateral_impact"
+    ]
+  },
+  {
+    "finding_key": "l4_l5_disc_bulge",
+    "condition_name": "Broad-Based Disc Bulge L4-L5",
+    "modality": "MRI",
+    "anatomical_region": "lumbar_spine",
+    "finding_text": "Broad-based disc bulge at L4-L5 with mild bilateral facet hypertrophy. No significant central canal stenosis. Mild bilateral neural foraminal narrowing without definite nerve root compression. Disc desiccation noted at this level.",
+    "severity": "mild",
+    "icd10_codes": [
+      "M51.26"
+    ],
+    "cpt_codes": [
+      "72148"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_backward",
+      "heavy_lifting"
+    ]
+  },
+  {
+    "finding_key": "l5_s1_herniation_right",
+    "condition_name": "Right Paracentral Disc Extrusion L5-S1",
+    "modality": "MRI",
+    "anatomical_region": "lumbar_spine",
+    "finding_text": "Right paracentral disc extrusion at L5-S1 measuring 8mm with inferior migration. Mass effect on the right S1 nerve root. Moderate right lateral recess stenosis. Disc material appears hyperintense on T2 suggesting acute extrusion.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "M51.17"
+    ],
+    "cpt_codes": [
+      "72148",
+      "63030"
+    ],
+    "trauma_mechanisms": [
+      "heavy_lifting",
+      "mva_rear_impact"
+    ]
+  },
+  {
+    "finding_key": "l1_compression_fracture",
+    "condition_name": "Acute Wedge Compression Fracture L1",
+    "modality": "XRAY",
+    "anatomical_region": "lumbar_spine",
+    "finding_text": "Approximately 25% anterior wedge compression deformity of L1 vertebral body with loss of height. Posterior cortex intact. No retropulsion of fragments into spinal canal. Acute angulation noted. No other vertebral body fractures identified.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S32.010A"
+    ],
+    "cpt_codes": [
+      "72100",
+      "22513"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_backward",
+      "mva_frontal_impact"
+    ]
+  },
+  {
+    "finding_key": "supraspinatus_full_thickness_tear",
+    "condition_name": "Full-Thickness Supraspinatus Tendon Tear",
+    "modality": "MRI",
+    "anatomical_region": "shoulder_right",
+    "finding_text": "Full-thickness tear of the supraspinatus tendon at its insertion on the greater tuberosity. Tendon retraction of approximately 2cm. Moderate fatty infiltration of the supraspinatus muscle belly (Goutallier grade 2). Associated subacromial-subdeltoid bursal fluid.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "M75.121"
+    ],
+    "cpt_codes": [
+      "73221",
+      "23410"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_on_outstretched_arm",
+      "heavy_lifting"
+    ]
+  },
+  {
+    "finding_key": "acromioclavicular_separation_grade3",
+    "condition_name": "Grade 3 Acromioclavicular Joint Separation",
+    "modality": "XRAY",
+    "anatomical_region": "shoulder_left",
+    "finding_text": "Grade 3 acromioclavicular joint separation with complete disruption of AC and coracoclavicular ligaments. Coracoclavicular distance measures 15mm (contralateral 8mm). Clavicle elevated relative to acromion. Weight-bearing views confirm grade 3 injury.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S43.102A"
+    ],
+    "cpt_codes": [
+      "73040",
+      "23550"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_lateral_shoulder",
+      "sports_collision"
+    ]
+  },
+  {
+    "finding_key": "acl_complete_tear",
+    "condition_name": "Complete ACL Tear with Bone Bruise Pattern",
+    "modality": "MRI",
+    "anatomical_region": "knee_right",
+    "finding_text": "Complete midsubstance tear of the anterior cruciate ligament with discontinuity of fibers. Associated bone bruise pattern involving the lateral femoral condyle and posterolateral tibial plateau (pivot-shift mechanism). Joint effusion present. Lateral meniscus intact. Medial meniscus posterior horn shows grade 2 signal.",
+    "severity": "severe",
+    "icd10_codes": [
+      "S83.511A"
+    ],
+    "cpt_codes": [
+      "73721",
+      "29888"
+    ],
+    "trauma_mechanisms": [
+      "sports_pivot_injury",
+      "slip_fall_twisting"
+    ]
+  },
+  {
+    "finding_key": "medial_meniscus_bucket_handle_tear",
+    "condition_name": "Bucket-Handle Tear Medial Meniscus",
+    "modality": "MRI",
+    "anatomical_region": "knee_left",
+    "finding_text": "Bucket-handle tear of the medial meniscus with displaced fragment into the intercondylar notch. Double PCL sign present on sagittal images. Truncated appearance of the medial meniscal body on coronal images. Large joint effusion.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S83.211A"
+    ],
+    "cpt_codes": [
+      "73721",
+      "29881"
+    ],
+    "trauma_mechanisms": [
+      "sports_pivot_injury",
+      "slip_fall_twisting"
+    ]
+  },
+  {
+    "finding_key": "acute_subdural_hematoma",
+    "condition_name": "Acute Subdural Hematoma, Left Frontoparietal",
+    "modality": "CT",
+    "anatomical_region": "brain",
+    "finding_text": "Acute crescent-shaped extra-axial fluid collection over the left frontoparietal convexity measuring 8mm in maximum thickness. 5mm midline shift to the right. Effacement of the left lateral ventricle. Hyperdense appearance consistent with acute blood products. No skull fracture identified.",
+    "severity": "severe",
+    "icd10_codes": [
+      "S06.5X0A"
+    ],
+    "cpt_codes": [
+      "70450"
+    ],
+    "trauma_mechanisms": [
+      "mva_frontal_impact",
+      "blunt_head_trauma",
+      "slip_fall_head_strike"
+    ]
+  },
+  {
+    "finding_key": "epidural_hematoma_temporal",
+    "condition_name": "Acute Epidural Hematoma, Right Temporal",
+    "modality": "CT",
+    "anatomical_region": "brain",
+    "finding_text": "Biconvex hyperdense extra-axial collection in the right temporal region measuring 1.2cm in thickness. Associated nondisplaced fracture of the right temporal bone crossing the middle meningeal artery groove. Mass effect with partial effacement of the right temporal horn. Neurosurgical emergency.",
+    "severity": "severe",
+    "icd10_codes": [
+      "S06.4X0A"
+    ],
+    "cpt_codes": [
+      "70450",
+      "61108"
+    ],
+    "trauma_mechanisms": [
+      "blunt_head_trauma",
+      "mva_lateral_impact"
+    ]
+  },
+  {
+    "finding_key": "rib_fractures_5th_6th_left",
+    "condition_name": "Displaced Fractures Left 5th and 6th Ribs",
+    "modality": "XRAY",
+    "anatomical_region": "chest",
+    "finding_text": "Minimally displaced fractures of the left 5th and 6th ribs in the anterior axillary line. No pneumothorax or hemothorax. No flail segment. Cardiac and mediastinal contours normal. Left costophrenic angle sharp.",
+    "severity": "mild",
+    "icd10_codes": [
+      "S22.32XA"
+    ],
+    "cpt_codes": [
+      "71100"
+    ],
+    "trauma_mechanisms": [
+      "mva_frontal_impact",
+      "slip_fall_chest"
+    ]
+  },
+  {
+    "finding_key": "pneumothorax_traumatic",
+    "condition_name": "Traumatic Pneumothorax, Right",
+    "modality": "XRAY",
+    "anatomical_region": "chest",
+    "finding_text": "Right-sided pneumothorax with approximately 20% lung collapse. Visible pleural line. No tension physiology. No rib fractures identified. No mediastinal shift. Left lung clear.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S27.0XXA"
+    ],
+    "cpt_codes": [
+      "71045",
+      "32551"
+    ],
+    "trauma_mechanisms": [
+      "mva_frontal_impact",
+      "blunt_chest_trauma"
+    ]
+  },
+  {
+    "finding_key": "distal_radius_fracture_colles",
+    "condition_name": "Colles Fracture, Distal Radius, Left",
+    "modality": "XRAY",
+    "anatomical_region": "wrist_left",
+    "finding_text": "Transverse fracture of the distal radial metaphysis with dorsal angulation and impaction. Dorsal comminution present. Ulnar styloid avulsion fracture also noted. Radiocarpal joint congruent. Distal radioulnar joint maintained.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S52.532A"
+    ],
+    "cpt_codes": [
+      "73100",
+      "25605"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_on_outstretched_arm"
+    ]
+  },
+  {
+    "finding_key": "hip_fracture_intertrochanteric",
+    "condition_name": "Intertrochanteric Hip Fracture, Right",
+    "modality": "XRAY",
+    "anatomical_region": "hip_right",
+    "finding_text": "Comminuted intertrochanteric fracture of the right proximal femur with involvement of both greater and lesser trochanters. Varus angulation of the femoral neck. No extension into the subcapital region. Osteopenic bone quality noted.",
+    "severity": "severe",
+    "icd10_codes": [
+      "S72.141A"
+    ],
+    "cpt_codes": [
+      "73500",
+      "27245"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_lateral_hip"
+    ]
+  },
+  {
+    "finding_key": "ankle_bimalleolar_fracture",
+    "condition_name": "Bimalleolar Ankle Fracture, Left",
+    "modality": "XRAY",
+    "anatomical_region": "ankle_left",
+    "finding_text": "Transverse fracture of the lateral malleolus at the level of the syndesmosis with 2mm displacement. Oblique fracture of the medial malleolus with minimal displacement. Talar shift of 3mm laterally. Syndesmotic widening noted on mortise view.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S82.842A"
+    ],
+    "cpt_codes": [
+      "73620",
+      "27814"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_twisting"
+    ]
+  },
+  {
+    "finding_key": "cerebral_contusion_frontal",
+    "condition_name": "Hemorrhagic Contusion, Bilateral Frontal Lobes",
+    "modality": "CT",
+    "anatomical_region": "brain",
+    "finding_text": "Bilateral hemorrhagic contusions in the frontal lobes, right greater than left. Surrounding vasogenic edema. No significant mass effect or midline shift. Basal cisterns patent. No subarachnoid hemorrhage. Skull intact.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S06.320A"
+    ],
+    "cpt_codes": [
+      "70450"
+    ],
+    "trauma_mechanisms": [
+      "mva_frontal_impact",
+      "blunt_head_trauma"
+    ]
+  },
+  {
+    "finding_key": "patellar_fracture_transverse",
+    "condition_name": "Transverse Patellar Fracture, Right",
+    "modality": "XRAY",
+    "anatomical_region": "knee_right",
+    "finding_text": "Transverse fracture through the mid-body of the right patella with 4mm diastasis of fracture fragments. Extensor mechanism disrupted. Large joint effusion (lipohaemarthrosis) noted. No other fractures identified.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S82.001A"
+    ],
+    "cpt_codes": [
+      "73560",
+      "27524"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_direct_knee",
+      "mva_dashboard_injury"
+    ]
+  },
+  {
+    "finding_key": "shoulder_dislocation_anterior",
+    "condition_name": "Anterior Shoulder Dislocation with Hill-Sachs Lesion",
+    "modality": "XRAY",
+    "anatomical_region": "shoulder_right",
+    "finding_text": "Anterior glenohumeral dislocation with humeral head positioned anterior and inferior to glenoid. Hill-Sachs impaction fracture of the posterolateral humeral head noted. No Bankart fracture fragment identified. No other fractures.",
+    "severity": "moderate",
+    "icd10_codes": [
+      "S43.014A"
+    ],
+    "cpt_codes": [
+      "73040",
+      "23650"
+    ],
+    "trauma_mechanisms": [
+      "slip_fall_on_outstretched_arm",
+      "sports_collision"
+    ]
+  }
+]

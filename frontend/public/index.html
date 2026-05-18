@@ -625,8 +625,9 @@
         </div>
     </div>
 
+    <script src="config.js"></script>
     <script>
-        // State
+        // ===== STATE =====
         let studies = [];
         let currentStudy = null;
         let currentImage = null;
@@ -639,9 +640,6 @@
         let isDrawing = false;
         let startPos = { x: 0, y: 0 };
         let panOffset = { x: 0, y: 0 };
-        
-const SUPABASE_URL = 'https://vodhhauwowkalvaxzqyv.supabase.co';
-        const SUPABASE_KEY = 'sb_publishable_XMqRO8wC0NpRwzSS4rF9ow_fLeInNey';
         
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {

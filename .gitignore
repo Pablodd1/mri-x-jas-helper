@@ -29,7 +29,47 @@ Thumbs.db
 # Ollama (local model weights)
 ~/.ollama/
 
+# Vercel Python build artifacts
+.vercel_python_packages/
+PIL/
+Werkzeug-*.dist-info/
+aiohappyeyeballs*/
+aiohttp*/
+aiosignal*/
+anyio*/
+attr/
+attrs*/
+bin/
+certifi*/
+dataclasses_json*/
+deepgram*/
+frozenlist*/
+h11*/
+httpcore*/
+httpx*/
+idna*/
+marshmallow*/
+multidict*/
+mypy_extensions*/
+nibabel*/
+nisext/
+numpy*/
+packaging*/
+pillow*/
+propcache*/
+pydicom*/
+sniffio*/
+typing_extensions*/
+typing_inspect*/
+verboselogs*/
+websockets*/
+werkzeug/
+yarl*/
+
 # Temp files
 *.tmp
 *.log
 .vercel
+
+# Frontend config (contains Supabase credentials)
+frontend/public/config.js

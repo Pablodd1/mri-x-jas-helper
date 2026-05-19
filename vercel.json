@@ -1,14 +1,16 @@
 {
-  "buildCommand": "echo 'Static build'",
+  "buildCommand": "cd frontend && bash build.sh",
   "outputDirectory": "frontend/public",
-  "functions": {
-    "api/**/*.py": {
-      "runtime": "python3.11",
-      "memory": 1024,
-      "maxDuration": 60
-    }
-  },
+  "installCommand": "cd frontend && npm install",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
   ]
 }

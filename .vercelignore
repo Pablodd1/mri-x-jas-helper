@@ -1,0 +1,24 @@
+# Vercel deploy — only upload what's needed
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.vercel/
+.vercel_python_packages/
+node_modules/
+.git/
+.github/
+.gitignore
+.vercelignore
+*.md
+docker-compose.yml
+SETUP_GUIDE.md
+SPEC.md
+scripts/
+backend/
+PIL/
+nibabel/
+numpy/
+pydicom/
+nisext/
+werkzeug/

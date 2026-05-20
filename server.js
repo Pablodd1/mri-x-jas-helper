@@ -22,6 +22,10 @@ const KIMI_VISION_MODEL = process.env.KIMI_VISION_MODEL || 'kimi-k2.6';
 const DEEPSEEK_API_KEY = process.env.DEEPSEEK_API_KEY || '';
 const DEEPSEEK_BASE_URL = 'https://api.deepseek.com/v1';
 
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_VISION_MODEL = 'gemini-2.5-flash';  // Gemini 2.5 Flash for vision (fast + capable)
+const GEMINI_CHAT_MODEL = 'gemini-2.5-flash';    // Gemini 2.5 Flash for chat/SOAP notes
+
 const CONFIG = {
   provider: AI_PROVIDER,
   fastDemo: process.env.FAST_DEMO === 'true',
@@ -35,6 +39,9 @@ const CONFIG = {
   kimiApiKey: KIMI_API_KEY,
   deepseekApiKey: DEEPSEEK_API_KEY,
   deepseekBaseUrl: DEEPSEEK_BASE_URL,
+  geminiApiKey: GEMINI_API_KEY,
+  geminiVisionModel: GEMINI_VISION_MODEL,
+  geminiChatModel: GEMINI_CHAT_MODEL,
   dbUrl: process.env.DATABASE_URL || 'postgresql://postgres.vodhhauwowkalvaxzqyv:***@aws-1-us-west-2.pooler.supabase.com:6543/postgres',
   keepAlive: '2h',
 };
@@ -45,6 +52,11 @@ if (CONFIG.provider === 'kimi') {
   console.log(`   Base: ${CONFIG.kimiBaseUrl}`);
 } else {
   console.log(`   Vision: ${CONFIG.visionModel} | Chat: ${CONFIG.chatModel}`);
+}
+if (CONFIG.geminiApiKey) {
+  console.log(`   Gemini 2.5: ${CONFIG.geminiVisionModel} (vision) | ${CONFIG.geminiChatModel} (chat)`);
+} else {
+  console.log('   Gemini 2.5: disabled (no GEMINI_API_KEY)');
 }
 
 // ═══════════════════ DB ═══════════════════
@@ -252,11 +264,103 @@ async function kimiVisionBatch(prompt, imagesBase64, concurrency = 2, model) {
   return results;
 }
 
+// ═══════════════════ GEMINI 2.5 HELPERS ═══════════════════
+let geminiClient = null;
+
+function getGeminiClient() {
+  if (!CONFIG.geminiApiKey) return null;
+  if (!geminiClient) {
+    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    geminiClient = new GoogleGenerativeAI(CONFIG.geminiApiKey);
+  }
+  return geminiClient;
+}
+
+async function geminiVision(prompt, imagesBase64, { model, temperature = 0.2, maxTokens = 2048, timeout = 120000 } = {}) {
+  const client = getGeminiClient();
+  if (!client) throw new Error('Gemini not configured — missing GEMINI_API_KEY');
+  
+  const m = model || CONFIG.geminiVisionModel;
+  console.log(`   👁️  Gemini 2.5 → Vision (${m}, ${imagesBase64.length} images)`);
+  
+  const genModel = client.getGenerativeModel({ 
+    model: m,
+    generationConfig: { temperature, maxOutputTokens: maxTokens }
+  });
+  
+  // Build parts array with images
+  const parts = [];
+  for (const img of imagesBase64) {
+    const mime = img.startsWith('/9j/') ? 'image/jpeg' : img.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
+    parts.push({ inlineData: { mimeType: mime, data: img } });
+  }
+  parts.push({ text: prompt });
+  
+  const result = await genModel.generateContent(parts);
+  const response = result.response;
+  const text = response.text();
+  if (!text) throw new Error('Gemini vision returned empty response');
+  console.log(`   ✅ Gemini vision: ${text.length} chars`);
+  return text;
+}
+
+async function geminiVisionBatch(prompt, imagesBase64, concurrency = 2, model) {
+  const client = getGeminiClient();
+  if (!client) throw new Error('Gemini not configured');
+  
+  const results = [];
+  for (let i = 0; i < imagesBase64.length; i += concurrency) {
+    const batch = imagesBase64.slice(i, i + concurrency);
+    const batchResults = await Promise.allSettled(
+      batch.map(img => geminiVision(prompt, [img], { model }))
+    );
+    for (const r of batchResults) {
+      results.push(r.status === 'fulfilled' ? r.value : `ERROR: ${r.reason?.message}`);
+    }
+  }
+  return results;
+}
+
+async function geminiChat(messages, { model, temperature = 0.2, maxTokens = 4096, timeout = 180000 } = {}) {
+  const client = getGeminiClient();
+  if (!client) throw new Error('Gemini not configured — missing GEMINI_API_KEY');
+  
+  const m = model || CONFIG.geminiChatModel;
+  console.log(`   🤖 Gemini 2.5 → Chat (${m}, ${messages.length} msgs)`);
+  
+  const genModel = client.getGenerativeModel({ 
+    model: m,
+    generationConfig: { temperature, maxOutputTokens: maxTokens }
+  });
+  
+  // Convert to Gemini chat format
+  const geminiMessages = messages.map(msg => ({
+    role: msg.role === 'assistant' ? 'model' : 'user',
+    parts: [{ text: msg.content }]
+  }));
+  
+  // Start chat with full history
+  const chat = genModel.startChat({ history: geminiMessages.slice(0, -1) });
+  const lastMsg = geminiMessages[geminiMessages.length - 1];
+  const result = await chat.sendMessage(lastMsg.parts[0].text);
+  const text = result.response.text();
+  if (!text) throw new Error('Gemini chat returned empty response');
+  console.log(`   ✅ Gemini chat: ${text.length} chars`);
+  return text;
+}
+
 // ═══════════════════ UNIFIED AI WRAPPERS ═══════════════════
 // Cascading: tries Ollama → Kimi → DeepSeek (never returns null early)
 
 async function aiChat(messages, options = {}) {
   const errors = [];
+  
+  // 0. Try Gemini 2.5 (primary)
+  if (CONFIG.geminiApiKey) {
+    try {
+      return await geminiChat(messages, options);
+    } catch (e) { errors.push('Gemini: ' + e.message); }
+  }
   
   // 1. Try Ollama (local)
   if (CONFIG.provider !== 'kimi' && CONFIG.provider !== 'deepseek') {
@@ -294,6 +398,13 @@ async function aiChat(messages, options = {}) {
 
 async function aiVision(prompt, imagesBase64, concurrency = 2, model) {
   const errors = [];
+  
+  // 0. Try Gemini 2.5 Vision (primary)
+  if (CONFIG.geminiApiKey) {
+    try {
+      return await geminiVisionBatch(prompt, imagesBase64, concurrency, model);
+    } catch (e) { errors.push('Gemini Vision: ' + e.message); }
+  }
   
   // 1. Try Ollama vision
   if (CONFIG.provider !== 'kimi' && CONFIG.provider !== 'deepseek') {
